@@ -1,9 +1,5 @@
 # 🐟 Seafood Guide (iOS)  
-![Platform: iOS](https://img.shields.io/badge/Platform-iOS-purple.svg)  
-![Language: Swift](https://img.shields.io/badge/Language-Swift-orange.svg)  
-![App Store](https://img.shields.io/badge/App%20Store-Download-blue?logo=apple)  
-![Version](https://img.shields.io/badge/Available%20on-iPhone%20%26%20iPad-success.svg)  
-![Feedback Welcome](https://img.shields.io/badge/Feedback-Issues%20%26%20Requests%20Welcome-brightgreen.svg)
+![Platform: iOS](https://img.shields.io/badge/Platform-iOS-purple.svg)  ![Language: Swift](https://img.shields.io/badge/Language-Swift-orange.svg)  ![App Store](https://img.shields.io/badge/App%20Store-Download-blue?logo=apple)  ![Version](https://img.shields.io/badge/Available%20on-iPhone%20%26%20iPad-success.svg)  ![Feedback Welcome](https://img.shields.io/badge/Feedback-Issues%20%26%20Requests%20Welcome-brightgreen.svg)
 
 ## 🎉 Welcome to the Official Seafood Guide (iOS) Repository
 
