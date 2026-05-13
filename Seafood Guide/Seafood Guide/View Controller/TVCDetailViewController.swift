@@ -182,7 +182,8 @@ class TVCDetailViewController: UITableViewController, UIWebViewDelegate, MFMailC
     func sendEmail() {
 
         str = item?.desc ?? ""
-        str = (str as NSString).substring(to: min(1165, str.count))
+        let nsStr = str as NSString
+        str = nsStr.substring(to: min(1165, nsStr.length))
 
         let one = item?.name
         let two = item?.region
