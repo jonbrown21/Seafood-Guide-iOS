@@ -10,7 +10,7 @@ The app itself is located on the macOS App Store, again as a proof of concept an
 This is the official hub for **Seafood Guide for iOS** — the mobile companion app that helps seafood lovers, chefs, and sustainability-minded folks identify, learn about, and choose seafood responsibly.
 
 📲 Download on the App Store:  
-👉 https://apps.apple.com/us/app/seafood-guide/idYOUR_APP_ID_HERE
+👉 https://itunes.apple.com/us/app/seafood-guide/id915176295
 
 While the app’s source code is not publicly included here, this repo offers you a direct way to engage: report bugs, request features, and stay updated with the app’s evolution.
 
@@ -27,7 +27,7 @@ Seafood Guide is your on-the-go seafood companion app for iPhone and iPad. Wheth
 - No login required; privacy-friendly  
 
 Try it today on the App Store:  
-👉 https://apps.apple.com/us/app/seafood-guide/idYOUR_APP_ID_HERE
+👉 https://itunes.apple.com/us/app/seafood-guide/id915176295
 
 ---
 
@@ -74,7 +74,7 @@ You’ll also find update info on the App Store listing itself.
 
 If you enjoy using Seafood Guide, consider leaving a review on the App Store — it helps us reach more users and improve the app further.
 
-👉 https://apps.apple.com/us/app/seafood-guide/idYOUR_APP_ID_HERE
+👉 https://itunes.apple.com/us/app/seafood-guide/id915176295
 
 ---
 
