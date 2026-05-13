@@ -157,7 +157,8 @@ class DetailLingoViewController: UITableViewController, UIWebViewDelegate, MFMai
     func sendEmail() {
 
         str = item?.descnews ?? ""
-        str = (str as NSString).substring(to: min(1165, str.count))
+        let nsStr = str as NSString
+        str = nsStr.substring(to: min(1165, nsStr.length))
 
         let one = item?.titlenews
         let two = item?.descnews
