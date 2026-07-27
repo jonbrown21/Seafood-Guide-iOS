@@ -26,8 +26,8 @@ DerivedData
 # Pods/
 
 # Agent/Codex local workflow artifacts (do not commit)
-AGENTS.md
-Agents.md
 .codex/
 codex-output/
 
+# macOS
+.DS_Store
