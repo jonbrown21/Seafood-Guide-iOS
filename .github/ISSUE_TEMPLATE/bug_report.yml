@@ -1,0 +1,55 @@
+name: Bug report
+description: Report a reproducible problem in Seafood Guide.
+title: "[Bug]: "
+labels:
+  - bug
+  - needs-triage
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for helping improve Seafood Guide. Search existing issues first and remove sensitive information from attachments.
+  - type: input
+    id: app-version
+    attributes:
+      label: App version
+      placeholder: "7.5.2"
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Device and iOS version
+      placeholder: "iPhone 15, iOS 18.5"
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Problem
+      description: What happened, and what did you expect instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open ...
+        2. Tap ...
+        3. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Logs or screenshots
+      description: Add minimal, sanitized evidence if it helps explain the problem.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues for this problem.
+          required: true
+        - label: I removed personal data, credentials, and private security details.
+          required: true

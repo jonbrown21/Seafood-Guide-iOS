@@ -1,94 +1,66 @@
-# 🐟 Seafood Guide (iOS)  
-![Platform: iOS](https://img.shields.io/badge/Platform-iOS-purple.svg)  ![Language: Swift](https://img.shields.io/badge/Language-Swift-orange.svg)  ![App Store](https://img.shields.io/badge/App%20Store-Download-blue?logo=apple)  ![Version](https://img.shields.io/badge/Available%20on-iPhone%20%26%20iPad-success.svg)  ![Feedback Welcome](https://img.shields.io/badge/Feedback-Issues%20%26%20Requests%20Welcome-brightgreen.svg)
+# Seafood Guide for iOS
 
-## 🎉 Welcome to the Official Seafood Guide (iOS) Repository
+[![iOS CI](https://github.com/jonbrown21/Seafood-Guide-iOS/actions/workflows/ci.yml/badge.svg)](https://github.com/jonbrown21/Seafood-Guide-iOS/actions/workflows/ci.yml)
+[![Security: policy](https://img.shields.io/badge/security-policy-blue.svg)](SECURITY.md)
+[![App Store](https://img.shields.io/badge/App_Store-download-0D96F6?logo=apple)](https://apps.apple.com/us/app/seafood-guide/id915176295)
 
-The goal of this application was to provide a starter iOS application for those looking to learn how to program an iOS app. This was the project that I used while learning how to program at the Big Nerd Ranch. 
+Seafood Guide is a UIKit app for iPhone and iPad that helps people learn seafood terminology, species information, sustainability considerations, and sourcing practices. The project began as a learning app and remains a practical example of a storyboard-based iOS application using Swift, Core Data, XML data sources, and Swift Package Manager.
 
-The app itself is located on the macOS App Store, again as a proof of concept and more or less as a portfolio piece. 
+## Features
 
-This is the official hub for **Seafood Guide for iOS** — the mobile companion app that helps seafood lovers, chefs, and sustainability-minded folks identify, learn about, and choose seafood responsibly.
+- Browse and search seafood species.
+- Read sustainability and sourcing guidance.
+- Learn common seafood and fishing terminology.
+- Explore curated educational content without an account.
+- Use the app without analytics or user tracking declared by the project.
 
-📲 Download on the App Store:  
-👉 https://itunes.apple.com/us/app/seafood-guide/id915176295
+## Requirements
 
-While the app’s source code is not publicly included here, this repo offers you a direct way to engage: report bugs, request features, and stay updated with the app’s evolution.
+- macOS with a current supported version of Xcode
+- iOS 15.1 or later for the app target
+- Git
 
----
+The shared `Seafood Guide` scheme resolves these Swift packages automatically:
 
-## 🐡 What Is Seafood Guide?
+- [ProgressHUD](https://github.com/relatedcode/ProgressHUD)
+- [SWXMLHash](https://github.com/drmohundro/SWXMLHash)
 
-Seafood Guide is your on-the-go seafood companion app for iPhone and iPad. Whether you want to check sustainability ratings, species info, ideal cooking methods, or sourcing tips — this app serves up the knowledge.
+## Getting started
 
-- Searchable database of seafood species  
-- Sustainability/eco-rating indicators  
-- Cooking, sourcing & storage tips  
-- Intuitive, mobile-optimized UI  
-- No login required; privacy-friendly  
+1. Clone the repository.
+2. Open `Seafood Guide.xcworkspace` in Xcode.
+3. Select the `Seafood Guide` scheme and an iOS simulator.
+4. Build and run with <kbd>Command</kbd>+<kbd>R</kbd>.
 
-Try it today on the App Store:  
-👉 https://itunes.apple.com/us/app/seafood-guide/id915176295
+For a command-line, signing-free validation build:
 
----
+```sh
+xcodebuild build \
+  -workspace "Seafood Guide.xcworkspace" \
+  -scheme "Seafood Guide" \
+  -destination "generic/platform=iOS Simulator" \
+  CODE_SIGNING_ALLOWED=NO
+```
 
-## 🐞 Reporting Bugs
+## Project status
 
-Encounter a bug or unexpected behavior? Please help us improve:
+The current app version is `7.5.2`. Maintenance focuses on correctness, compatibility, security, and incremental modernization. A SwiftUI migration is a possible future direction, but proposals should begin in [GitHub Discussions](https://github.com/jonbrown21/Seafood-Guide-iOS/discussions) before becoming implementation issues.
 
-1. Open an issue here:  
-   👉 https://github.com/breelabs/Seafood-Guide-iOS/issues  
-2. Provide:
-   - Your iOS version  
-   - Device model (iPhone/iPad)  
-   - App version (from **Settings → Seafood Guide**)  
-   - Steps to reproduce the issue  
-   - Screenshots if helpful  
+See the [changelog](CHANGELOG.md) for notable changes and [release guide](docs/RELEASING.md) for versioning policy.
 
-Your input helps us support more devices, improve accuracy, and enhance your experience.
+## Contributing and support
 
----
+Bug reports and focused improvements are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request. Use:
 
-## ✨ Requesting Features
+- [Issues](https://github.com/jonbrown21/Seafood-Guide-iOS/issues) for reproducible bugs and actionable work;
+- [Discussions](https://github.com/jonbrown21/Seafood-Guide-iOS/discussions) for questions, ideas, and broad design proposals;
+- [SECURITY.md](SECURITY.md) for private vulnerability reporting;
+- [SUPPORT.md](SUPPORT.md) for usage help.
 
-Want to see something new, a species added, or a fresh sustainability filter?
+All participation is governed by the [Code of Conduct](CODE_OF_CONDUCT.md).
 
-1. Visit the feature tracker:  
-   👉 https://github.com/breelabs/Seafood-Guide-iOS/issues  
-2. Use the **Feature Request** label  
-3. Describe your suggestion and why it matters to you  
+## License
 
-We genuinely value community suggestions — they often shape future updates!
+Copyright is retained by the project owner. The source, bundled content, and artwork are publicly viewable for learning and collaboration but are not offered under an open-source license. See [LICENSE](LICENSE) for details. Contributions are accepted under the same repository terms.
 
----
-
-## 📬 Updates & Announcements
-
-Follow the project’s **Releases** page for latest changes, version notes, and new additions:  
-👉 https://github.com/breelabs/Seafood-Guide-iOS/releases
-
-You’ll also find update info on the App Store listing itself.
-
----
-
-## ❤️ Support the App
-
-If you enjoy using Seafood Guide, consider leaving a review on the App Store — it helps us reach more users and improve the app further.
-
-👉 https://itunes.apple.com/us/app/seafood-guide/id915176295
-
----
-
-## 📄 License
-
-The content of this repository (documentation, issue tracker, media) is available under the **MIT License**.  
-The **Seafood Guide iOS app** itself is proprietary and distributed exclusively via the Apple App Store.
-
----
-
-Thank you for using **Seafood Guide for iOS**!  
-Your feedback and ideas are greatly appreciated — please share them right here.  
-
-To Do:
-- Convert to Swift UI
-
-<a href="https://www.buymeacoffee.com/jonbrown" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
+The compiled app is distributed through the [Apple App Store](https://apps.apple.com/us/app/seafood-guide/id915176295).
