@@ -1,0 +1,74 @@
+name: iOS CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  repository-policy:
+    name: Repository policy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Validate repository files
+        shell: bash
+        run: |
+          set -euo pipefail
+          required=(
+            AGENTS.md
+            CHANGELOG.md
+            CODE_OF_CONDUCT.md
+            CONTRIBUTING.md
+            LICENSE
+            README.md
+            SECURITY.md
+            SUPPORT.md
+            .github/CODEOWNERS
+            .github/PULL_REQUEST_TEMPLATE.md
+          )
+          for path in "${required[@]}"; do
+            test -s "$path" || { echo "Missing required file: $path"; exit 1; }
+          done
+          if git ls-files -z | grep -zqE '(^|/)\.DS_Store$|(^|/)xcuserdata/|(^|/)\.codex/'; then
+            echo "Local or generated artifacts are tracked."
+            exit 1
+          fi
+          grep -q '^## \[Unreleased\]' CHANGELOG.md
+
+  build:
+    name: Build (${{ matrix.xcode }})
+    runs-on: macos-15
+    strategy:
+      fail-fast: false
+      matrix:
+        xcode:
+          - "16.4"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Select Xcode
+        run: sudo xcode-select -s "/Applications/Xcode_${{ matrix.xcode }}.app/Contents/Developer"
+      - name: Resolve packages
+        run: >-
+          xcodebuild -resolvePackageDependencies
+          -workspace "Seafood Guide.xcworkspace"
+          -scheme "Seafood Guide"
+      - name: Build without signing
+        run: >-
+          xcodebuild build
+          -workspace "Seafood Guide.xcworkspace"
+          -scheme "Seafood Guide"
+          -destination "generic/platform=iOS Simulator"
+          -derivedDataPath "$RUNNER_TEMP/DerivedData"
+          CODE_SIGNING_ALLOWED=NO
