@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and ideas
+    url: https://github.com/jonbrown21/Seafood-Guide-iOS/discussions
+    about: Ask for help or explore an idea before it becomes actionable work.
+  - name: Security vulnerability
+    url: https://github.com/jonbrown21/Seafood-Guide-iOS/security/advisories/new
+    about: Report security vulnerabilities privately. Do not create a public issue.

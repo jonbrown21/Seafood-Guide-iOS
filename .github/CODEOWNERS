@@ -1,0 +1,8 @@
+# The repository owner reviews all changes by default.
+* @jonbrown21
+
+# Require explicit review for automation, governance, and release policy.
+/.github/ @jonbrown21
+/AGENTS.md @jonbrown21
+/SECURITY.md @jonbrown21
+/docs/RELEASING.md @jonbrown21
