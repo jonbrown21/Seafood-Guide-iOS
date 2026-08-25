@@ -1,14 +1,6 @@
-<xml>
-	<news>
-		<new>
-			<titlenews>Things you can do</titlenews>
-			<descnews>Always ask where seafood comes from and whether it was wild-caught or farmed?  For example, choose wild-caught, or otherwise sustainably produced, domestic shrimp over imported farmed shrimp. Even if the person you ask does not know, your question will help encourage the establishment to become more knowledge about seafood sourcing.
-Tell the FDA to increase inspection of imported seafood.
-                
-Ask Congress to increase funding and oversight for the FDA’s seafood import inspection program.
-
-Tell the USDA to expand country-of-origin labeling so that it includes processed seafood and includes every store and restaurant.</descnews>
-			<linknews>2</linknews>
-		</new>
-	</news>
-</xml>
+<?xml version="1.0" encoding="UTF-8"?>
+<xml reviewed="2026-08-24"><news>
+  <new><titlenews>Ask Four Questions</titlenews><descnews>What species is it? Where was it caught or farmed? Was it wild-caught or farm-raised? What fishing gear or farming system was used? These details make source-specific guidance much more useful.</descnews><linknews>2</linknews><sources><source><sourcetitle>NOAA Fisheries — Sustainable Seafood for Consumers</sourcetitle><sourceurl>https://www.fisheries.noaa.gov/topic/sustainable-seafood/seafood-consumers</sourceurl></source></sources></new>
+  <new><titlenews>Check Local Advisories</titlenews><descnews>For fish caught by you, family, or friends, check the advisory for that lake, river, coast, state, territory, or Tribe. Local guidance can address contaminants that a nationwide species chart cannot.</descnews><linknews>2</linknews><sources><source><sourcetitle>U.S. EPA — Choose Fish and Shellfish Wisely</sourcetitle><sourceurl>https://www.epa.gov/choose-fish-and-shellfish-wisely</sourceurl></source></sources></new>
+  <new><titlenews>Buy and Handle Seafood Safely</titlenews><descnews>Choose seafood from reputable sellers, keep it cold, avoid damaged packaging, prevent cross-contamination, and follow FDA cooking and raw-shellfish guidance. Sustainability information does not replace food-safety practices.</descnews><linknews>2</linknews><sources><source><sourcetitle>FDA — Selecting and Serving Fresh and Frozen Seafood Safely</sourcetitle><sourceurl>https://www.fda.gov/food/buy-store-serve-safe-food/selecting-and-serving-fresh-and-frozen-seafood-safely</sourceurl></source></sources></new>
+</news></xml>

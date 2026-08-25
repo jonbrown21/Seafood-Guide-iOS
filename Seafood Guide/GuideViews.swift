@@ -333,6 +333,8 @@ struct SeafoodDetailView: View {
                             .fixedSize(horizontal: false, vertical: true)
                     }
 
+                    SourceLinksView(sources: entry.sources)
+
                     Group {
                         if let shareImage {
                             ShareLink(
@@ -392,6 +394,9 @@ struct SeafoodDetailView: View {
     }
 
     private var recommendationColor: Color {
+        if entry.status == "best" { return .green }
+        if entry.status == "good" || entry.status == "check" { return .orange }
+        if entry.status == "avoid" { return .red }
         let value = recommendation.lowercased()
         if value.contains("avoid") || value.contains("unsafe") { return .red }
         if value.contains("not ideal") || value.contains("mercury") || value.contains("sustainable choice") || value.contains("sustanable choice") { return .orange }
@@ -400,6 +405,9 @@ struct SeafoodDetailView: View {
     }
 
     private var recommendationSymbol: String {
+        if entry.status == "best" { return "checkmark.seal.fill" }
+        if entry.status == "good" || entry.status == "check" { return "exclamationmark.circle.fill" }
+        if entry.status == "avoid" { return "exclamationmark.triangle.fill" }
         let value = recommendation.lowercased()
         if value.contains("avoid") || value.contains("unsafe") { return "exclamationmark.triangle.fill" }
         if value.contains("not ideal") || value.contains("mercury") || value.contains("sustainable choice") || value.contains("sustanable choice") { return "exclamationmark.circle.fill" }
@@ -626,12 +634,43 @@ struct ArticleDetailView: View {
                     )
                 Text(article.title).font(.system(size: 32, weight: .bold, design: .rounded))
                 Text(article.body).font(.body).lineSpacing(5)
+                SourceLinksView(sources: article.sources)
             }
             .padding()
         }
         .background(OceanBackground())
         .navigationTitle(article.title)
         .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+struct SourceLinksView: View {
+    let sources: [GuideSource]
+
+    var body: some View {
+        if !sources.isEmpty {
+            VStack(alignment: .leading, spacing: 12) {
+                Label("Sources", systemImage: "checkmark.seal.fill")
+                    .font(.headline)
+                    .foregroundStyle(Color.ink)
+
+                ForEach(sources) { source in
+                    Link(destination: source.url) {
+                        HStack(spacing: 12) {
+                            Image(systemName: "arrow.up.right.square.fill")
+                                .foregroundStyle(Color.ocean)
+                            Text(source.title)
+                                .font(.subheadline.weight(.semibold))
+                                .multilineTextAlignment(.leading)
+                            Spacer(minLength: 8)
+                        }
+                        .foregroundStyle(Color.ink)
+                        .padding(14)
+                        .background(.white.opacity(0.82), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    }
+                }
+            }
+        }
     }
 }
 

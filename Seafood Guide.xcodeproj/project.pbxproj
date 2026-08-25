@@ -12,7 +12,7 @@
 		A10000030000000000000001 /* GuideStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000030000000000000001 /* GuideStore.swift */; };
 		A10000040000000000000001 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000040000000000000001 /* Theme.swift */; };
 		A10000050000000000000001 /* GuideViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000050000000000000001 /* GuideViews.swift */; };
-		A10000060000000000000001 /* SeafoodData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000060000000000000001 /* SeafoodData.swift */; };
+		A10000170000000000000001 /* Seafood/DataSource/seafood.xml in Resources */ = {isa = PBXBuildFile; fileRef = A20000170000000000000001 /* Seafood/DataSource/seafood.xml */; };
 		A10000110000000000000001 /* Lingo/DataSource/ios-lingo.xml in Resources */ = {isa = PBXBuildFile; fileRef = A20000110000000000000001 /* Lingo/DataSource/ios-lingo.xml */; };
 		A10000120000000000000001 /* Top 10/DataSource/ios-news.xml in Resources */ = {isa = PBXBuildFile; fileRef = A20000120000000000000001 /* Top 10/DataSource/ios-news.xml */; };
 		A10000130000000000000001 /* About/DataSource/ios-about-1.xml in Resources */ = {isa = PBXBuildFile; fileRef = A20000130000000000000001 /* About/DataSource/ios-about-1.xml */; };
@@ -28,7 +28,7 @@
 		A20000030000000000000001 /* GuideStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuideStore.swift; sourceTree = "<group>"; };
 		A20000040000000000000001 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		A20000050000000000000001 /* GuideViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuideViews.swift; sourceTree = "<group>"; };
-		A20000060000000000000001 /* SeafoodData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeafoodData.swift; sourceTree = "<group>"; };
+		A20000170000000000000001 /* Seafood/DataSource/seafood.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Seafood/DataSource/seafood.xml; sourceTree = "<group>"; };
 		A20000110000000000000001 /* Lingo/DataSource/ios-lingo.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Lingo/DataSource/ios-lingo.xml"; sourceTree = "<group>"; };
 		A20000120000000000000001 /* Top 10/DataSource/ios-news.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Top 10/DataSource/ios-news.xml"; sourceTree = "<group>"; };
 		A20000130000000000000001 /* About/DataSource/ios-about-1.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "About/DataSource/ios-about-1.xml"; sourceTree = "<group>"; };
@@ -69,7 +69,7 @@
 				A20000030000000000000001 /* GuideStore.swift */,
 				A20000040000000000000001 /* Theme.swift */,
 				A20000050000000000000001 /* GuideViews.swift */,
-				A20000060000000000000001 /* SeafoodData.swift */,
+				A20000170000000000000001 /* Seafood/DataSource/seafood.xml */,
 				A20000110000000000000001 /* Lingo/DataSource/ios-lingo.xml */,
 				A20000120000000000000001 /* Top 10/DataSource/ios-news.xml */,
 				A20000130000000000000001 /* About/DataSource/ios-about-1.xml */,
@@ -160,6 +160,7 @@
 				A10000140000000000000001 /* About/DataSource/ios-about-2.xml in Resources */,
 				A10000150000000000000001 /* About/DataSource/ios-about-3.xml in Resources */,
 				A10000160000000000000001 /* PrivacyInfo.xcprivacy in Resources */,
+				A10000170000000000000001 /* Seafood/DataSource/seafood.xml in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -175,7 +176,6 @@
 				A10000030000000000000001 /* GuideStore.swift in Sources */,
 				A10000040000000000000001 /* Theme.swift in Sources */,
 				A10000050000000000000001 /* GuideViews.swift in Sources */,
-				A10000060000000000000001 /* SeafoodData.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

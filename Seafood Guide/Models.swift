@@ -1,6 +1,13 @@
 import Foundation
 import SwiftUI
 
+struct GuideSource: Identifiable, Hashable {
+    let title: String
+    let url: URL
+
+    var id: String { url.absoluteString }
+}
+
 struct SeafoodEntry: Identifiable, Hashable {
     let id = UUID()
     let name: String
@@ -9,6 +16,25 @@ struct SeafoodEntry: Identifiable, Hashable {
     let advice: String
     let region: String
     let status: String
+    let sources: [GuideSource]
+
+    init(
+        name: String,
+        categoryIndex: Int,
+        description: String,
+        advice: String,
+        region: String,
+        status: String,
+        sources: [GuideSource] = []
+    ) {
+        self.name = name
+        self.categoryIndex = categoryIndex
+        self.description = description
+        self.advice = advice
+        self.region = region
+        self.status = status
+        self.sources = sources
+    }
 }
 
 struct GuideArticle: Identifiable, Hashable {
@@ -16,6 +42,14 @@ struct GuideArticle: Identifiable, Hashable {
     let title: String
     let body: String
     let number: Int?
+    let sources: [GuideSource]
+
+    init(title: String, body: String, number: Int?, sources: [GuideSource] = []) {
+        self.title = title
+        self.body = body
+        self.number = number
+        self.sources = sources
+    }
 }
 
 struct GuideSection: Identifiable, Hashable {
@@ -28,6 +62,20 @@ enum SeafoodCategory: Int, CaseIterable, Identifiable {
     case mild, flavorful, steak, small, shellfish, other, all, dirtyDozen
 
     var id: Int { rawValue }
+
+    init?(xmlValue: String) {
+        switch xmlValue {
+        case "mild": self = .mild
+        case "flavorful": self = .flavorful
+        case "steak": self = .steak
+        case "small": self = .small
+        case "shellfish": self = .shellfish
+        case "other": self = .other
+        case "all": self = .all
+        case "highestMercury": self = .dirtyDozen
+        default: return nil
+        }
+    }
     var title: String {
         switch self {
         case .mild: "Mild fish"
@@ -37,7 +85,7 @@ enum SeafoodCategory: Int, CaseIterable, Identifiable {
         case .shellfish: "Shellfish"
         case .other: "Other seafood"
         case .all: "All seafood"
-        case .dirtyDozen: "Dirty dozen"
+        case .dirtyDozen: "Highest mercury"
         }
     }
     var symbolName: String {
@@ -61,7 +109,7 @@ enum SeafoodCategory: Int, CaseIterable, Identifiable {
         case .shellfish: "Clams, shrimp, scallops and more"
         case .other: "Everything else from the sea"
         case .all: "Browse the complete guide"
-        case .dirtyDozen: "Species to approach with care"
+        case .dirtyDozen: "FDA choices to avoid for pregnancy and children"
         }
     }
 
