@@ -1,4 +1,6 @@
 import SwiftUI
+import CoreTransferable
+import UniformTypeIdentifiers
 
 struct GuideRootView: View {
     @ObservedObject var store: GuideStore
@@ -238,7 +240,7 @@ struct SeafoodListView: View {
 
 struct SeafoodDetailView: View {
     let entry: SeafoodEntry
-    @Environment(\.openURL) private var openURL
+    @State private var shareImage: SeafoodShareImage?
 
     var body: some View {
         ZStack {
@@ -321,22 +323,27 @@ struct SeafoodDetailView: View {
                             .fixedSize(horizontal: false, vertical: true)
                     }
 
-                    HStack(spacing: 12) {
-                        ShareLink(item: shareText, subject: Text("Seafood Guide: \(entry.name)")) {
-                            Label("Share", systemImage: "square.and.arrow.up")
+                    Group {
+                        if let shareImage {
+                            ShareLink(
+                                item: shareImage,
+                                subject: Text("Seafood Guide: \(entry.name)"),
+                                message: Text("Explore \(entry.name) with Seafood Guide."),
+                                preview: SharePreview(
+                                    "\(entry.name) • Seafood Guide",
+                                    image: Image(systemName: "fish.fill")
+                                )
+                            ) {
+                                Label("Share this guide", systemImage: "square.and.arrow.up")
+                                    .frame(maxWidth: .infinity)
+                            }
+                        } else {
+                            Label("Preparing share image", systemImage: "photo.badge.arrow.down")
                                 .frame(maxWidth: .infinity)
+                                .foregroundStyle(.secondary)
                         }
-                        .buttonStyle(.borderedProminent)
-
-                        Button {
-                            if let mailURL { openURL(mailURL) }
-                        } label: {
-                            Label("Email", systemImage: "envelope.fill")
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.bordered)
-                        .disabled(mailURL == nil)
                     }
+                    .buttonStyle(.borderedProminent)
                     .controlSize(.large)
                     .padding(.bottom, 24)
                 }
@@ -347,6 +354,11 @@ struct SeafoodDetailView: View {
         }
         .navigationTitle("Seafood details")
         .navigationBarTitleDisplayMode(.inline)
+        .task {
+            if shareImage == nil {
+                shareImage = renderShareImage()
+            }
+        }
     }
 
     private var metadata: (label: String, value: String, symbol: String) {
@@ -385,9 +397,148 @@ struct SeafoodDetailView: View {
         return "exclamationmark.circle.fill"
     }
 
-    private var shareText: String { "\(entry.name)\n\n\(entry.region)\n\n\(entry.advice)\n\n\(entry.description)" }
-    private var mailURL: URL? {
-        URL(string: "mailto:?subject=Seafood%20Guide:%20\(entry.name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? entry.name)&body=\(shareText.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? shareText)")
+    private func renderShareImage() -> SeafoodShareImage? {
+        let card = SeafoodShareCard(
+            name: entry.name,
+            metadataLabel: metadata.label,
+            metadataValue: metadata.value,
+            recommendation: recommendation,
+            recommendationColor: recommendationColor,
+            recommendationSymbol: recommendationSymbol,
+            description: entry.description
+        )
+        let renderer = ImageRenderer(content: card)
+        renderer.scale = 1
+
+        guard let data = renderer.uiImage?.pngData() else { return nil }
+        let safeName = entry.name
+            .components(separatedBy: CharacterSet.alphanumerics.inverted)
+            .filter { !$0.isEmpty }
+            .joined(separator: "-")
+        return SeafoodShareImage(data: data, filename: "Seafood-Guide-\(safeName).png")
+    }
+}
+
+struct SeafoodShareImage: Transferable {
+    let data: Data
+    let filename: String
+
+    static var transferRepresentation: some TransferRepresentation {
+        DataRepresentation(exportedContentType: .png) { image in
+            image.data
+        }
+        .suggestedFileName { image in
+            image.filename
+        }
+    }
+}
+
+struct SeafoodShareCard: View {
+    let name: String
+    let metadataLabel: String
+    let metadataValue: String
+    let recommendation: String
+    let recommendationColor: Color
+    let recommendationSymbol: String
+    let description: String
+
+    var body: some View {
+        ZStack {
+            LinearGradient(
+                colors: [.appBackground, .sky.opacity(0.75), .seafoam.opacity(0.72)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+
+            Circle()
+                .fill(Color.sunshine.opacity(0.45))
+                .frame(width: 420, height: 420)
+                .offset(x: 420, y: -430)
+
+            Circle()
+                .fill(Color.coral.opacity(0.32))
+                .frame(width: 360, height: 360)
+                .offset(x: -470, y: 470)
+
+            VStack(alignment: .leading, spacing: 44) {
+                HStack(spacing: 22) {
+                    Image(systemName: "fish.fill")
+                        .font(.system(size: 42, weight: .semibold))
+                        .foregroundStyle(Color.ocean)
+                        .frame(width: 92, height: 92)
+                        .background(.white.opacity(0.82), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text("SEAFOOD GUIDE")
+                            .font(.system(size: 28, weight: .bold, design: .rounded))
+                            .tracking(3)
+                            .foregroundStyle(Color.ocean)
+                        Text("Choose seafood with confidence")
+                            .font(.system(size: 25, weight: .medium, design: .rounded))
+                            .foregroundStyle(Color.ink.opacity(0.68))
+                    }
+                }
+
+                Spacer(minLength: 0)
+
+                VStack(alignment: .leading, spacing: 22) {
+                    Text(metadataLabel.uppercased())
+                        .font(.system(size: 22, weight: .bold, design: .rounded))
+                        .tracking(2)
+                        .foregroundStyle(Color.ocean)
+                    Text(metadataValue)
+                        .font(.system(size: 30, weight: .semibold, design: .rounded))
+                        .foregroundStyle(Color.ink.opacity(0.72))
+                    Text(name)
+                        .font(.system(size: 76, weight: .bold, design: .rounded))
+                        .foregroundStyle(Color.ink)
+                        .minimumScaleFactor(0.68)
+                        .lineLimit(2)
+                }
+
+                HStack(spacing: 24) {
+                    Image(systemName: recommendationSymbol)
+                        .font(.system(size: 42, weight: .bold))
+                        .foregroundStyle(recommendationColor)
+                        .frame(width: 78, height: 78)
+                        .background(.white.opacity(0.76), in: Circle())
+
+                    VStack(alignment: .leading, spacing: 7) {
+                        Text("RECOMMENDATION")
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                            .tracking(2)
+                            .foregroundStyle(recommendationColor)
+                        Text(recommendation)
+                            .font(.system(size: 34, weight: .bold, design: .rounded))
+                            .foregroundStyle(Color.ink)
+                            .lineLimit(2)
+                    }
+                }
+                .padding(30)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(recommendationColor.opacity(0.15), in: RoundedRectangle(cornerRadius: 34, style: .continuous))
+
+                Text(description)
+                    .font(.system(size: 27, weight: .regular, design: .rounded))
+                    .foregroundStyle(Color.ink.opacity(0.76))
+                    .lineSpacing(8)
+                    .lineLimit(5)
+
+                Spacer(minLength: 0)
+
+                HStack {
+                    Text("Explore more in Seafood Guide")
+                        .font(.system(size: 27, weight: .bold, design: .rounded))
+                        .foregroundStyle(Color.ocean)
+                    Spacer()
+                    Image(systemName: "arrow.right.circle.fill")
+                        .font(.system(size: 38, weight: .bold))
+                        .foregroundStyle(Color.ocean)
+                }
+            }
+            .padding(72)
+        }
+        .frame(width: 1080, height: 1080)
     }
 }
 
