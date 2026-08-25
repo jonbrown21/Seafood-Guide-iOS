@@ -40,16 +40,16 @@ enum SeafoodCategory: Int, CaseIterable, Identifiable {
         case .dirtyDozen: "Dirty dozen"
         }
     }
-    var imageName: String {
+    var symbolName: String {
         switch self {
-        case .mild: "fish1"
-        case .flavorful: "fish2"
-        case .steak: "fish3"
-        case .small: "fish4"
-        case .shellfish: "fish5"
-        case .other: "fish6"
-        case .all: "allfish"
-        case .dirtyDozen: "donteat"
+        case .mild: "fish.fill"
+        case .flavorful: "water.waves"
+        case .steak: "fork.knife"
+        case .small: "sparkles"
+        case .shellfish: "seal.fill"
+        case .other: "circle.grid.2x2.fill"
+        case .all: "square.grid.2x2.fill"
+        case .dirtyDozen: "exclamationmark.triangle.fill"
         }
     }
     var subtitle: String {

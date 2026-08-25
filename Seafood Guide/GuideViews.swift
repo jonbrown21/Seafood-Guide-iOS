@@ -48,6 +48,8 @@ struct ExploreView: View {
                     }
                     .padding(.horizontal)
                 }
+                .frame(maxWidth: 920)
+                .frame(maxWidth: .infinity)
                 .padding(.vertical, 24)
             }
         }
@@ -61,12 +63,12 @@ struct CategoryCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Image(category.imageName)
-                .resizable()
-                .scaledToFill()
-                .frame(height: 116)
+            Image(systemName: category.symbolName)
+                .font(.system(size: 36, weight: .semibold))
+                .foregroundStyle(Color.ocean)
                 .frame(maxWidth: .infinity)
-                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .frame(height: 116)
+                .background(Color.seafoam, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
             Text(category.title).font(.headline).foregroundStyle(Color.ink)
             Text("\(count) entries · \(category.subtitle)")
                 .font(.caption)
