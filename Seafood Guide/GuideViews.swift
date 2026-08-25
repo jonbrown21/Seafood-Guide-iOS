@@ -1609,33 +1609,29 @@ struct ArticleDetailView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(articleColor.opacity(0.72), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
 
-            HStack(alignment: .top, spacing: 24) {
-                VStack(alignment: .leading, spacing: 22) {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Label("What to know", systemImage: "lightbulb.max.fill")
-                            .font(.title3.weight(.bold))
-                            .foregroundStyle(Color.ink)
-                        Text(article.body)
-                            .font(.title3)
-                            .foregroundStyle(Color.ink.opacity(0.78))
-                            .lineSpacing(7)
-                    }
-                    .padding(24)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(.white.opacity(0.86), in: RoundedRectangle(cornerRadius: 26, style: .continuous))
-
-                    SourceLinksView(sources: article.sources)
+            VStack(alignment: .leading, spacing: 22) {
+                VStack(alignment: .leading, spacing: 12) {
+                    Label("What to know", systemImage: "lightbulb.max.fill")
+                        .font(.title3.weight(.bold))
+                        .foregroundStyle(Color.ink)
+                    Text(article.body)
+                        .font(.title3)
+                        .foregroundStyle(Color.ink.opacity(0.78))
+                        .lineSpacing(7)
                 }
-                .frame(maxWidth: .infinity, alignment: .topLeading)
+                .padding(24)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(.white.opacity(0.86), in: RoundedRectangle(cornerRadius: 26, style: .continuous))
 
-                if !related.isEmpty {
-                    RelatedArticlesView(
-                        articles: related,
-                        allArticles: relatedArticles,
-                        presentation: presentation
-                    )
-                    .frame(width: 340, alignment: .topLeading)
-                }
+                SourceLinksView(sources: article.sources)
+            }
+
+            if !related.isEmpty {
+                RelatedArticlesView(
+                    articles: related,
+                    allArticles: relatedArticles,
+                    presentation: presentation
+                )
             }
         }
         .frame(maxWidth: 1180)
@@ -1663,6 +1659,8 @@ private struct RelatedArticlesView: View {
     let allArticles: [GuideArticle]
     let presentation: ArticlePresentation
 
+    private let columns = [GridItem(.adaptive(minimum: 260), spacing: 14)]
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Related topics")
@@ -1673,37 +1671,40 @@ private struct RelatedArticlesView: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
-            ForEach(articles) { relatedArticle in
-                NavigationLink {
-                    ArticleDetailView(
-                        article: relatedArticle,
-                        presentation: presentation,
-                        relatedArticles: allArticles
-                    )
-                } label: {
-                    HStack(spacing: 13) {
-                        Image(systemName: articleSymbol(for: relatedArticle.title, presentation: presentation))
-                            .font(.body.weight(.semibold))
-                            .foregroundStyle(Color.ocean)
-                            .frame(width: 42, height: 42)
-                            .background(
-                                presentation == .risks ? Color.coral.opacity(0.55) : Color.seafoam,
-                                in: RoundedRectangle(cornerRadius: 13, style: .continuous)
-                            )
+            LazyVGrid(columns: columns, alignment: .leading, spacing: 14) {
+                ForEach(articles) { relatedArticle in
+                    NavigationLink {
+                        ArticleDetailView(
+                            article: relatedArticle,
+                            presentation: presentation,
+                            relatedArticles: allArticles
+                        )
+                    } label: {
+                        HStack(spacing: 13) {
+                            Image(systemName: articleSymbol(for: relatedArticle.title, presentation: presentation))
+                                .font(.body.weight(.semibold))
+                                .foregroundStyle(Color.ocean)
+                                .frame(width: 46, height: 46)
+                                .background(
+                                    presentation == .risks ? Color.coral.opacity(0.55) : Color.seafoam,
+                                    in: RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                )
 
-                        Text(relatedArticle.title)
-                            .font(.body.weight(.semibold))
-                            .foregroundStyle(Color.ink)
-                            .multilineTextAlignment(.leading)
-                            .fixedSize(horizontal: false, vertical: true)
+                            Text(relatedArticle.title)
+                                .font(.body.weight(.semibold))
+                                .foregroundStyle(Color.ink)
+                                .multilineTextAlignment(.leading)
+                                .fixedSize(horizontal: false, vertical: true)
 
-                        Spacer(minLength: 8)
-                        CardChevron()
+                            Spacer(minLength: 8)
+                            CardChevron()
+                        }
+                        .padding(14)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+                        .background(.white.opacity(0.88), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
                     }
-                    .padding(13)
-                    .background(.white.opacity(0.88), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
         }
         .padding(20)
