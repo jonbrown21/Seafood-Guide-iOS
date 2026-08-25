@@ -52,18 +52,6 @@ enum SeafoodCategory: Int, CaseIterable, Identifiable {
         case .dirtyDozen: "exclamationmark.shield.fill"
         }
     }
-    var badgeSymbolName: String {
-        switch self {
-        case .mild: "leaf.fill"
-        case .flavorful: "fish.fill"
-        case .steak: "fish.fill"
-        case .small: "arrow.down.right"
-        case .shellfish: "water.waves"
-        case .other: "sparkles"
-        case .all: "fish.fill"
-        case .dirtyDozen: "exclamationmark"
-        }
-    }
     var subtitle: String {
         switch self {
         case .mild: "Gentle flavor and easy to pair"

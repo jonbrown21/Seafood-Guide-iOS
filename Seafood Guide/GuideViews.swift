@@ -61,7 +61,8 @@ struct ExploreView: View {
                                     .foregroundStyle(Color.ocean)
                             }
                             Spacer(minLength: 8)
-                            CategorySymbol(category: .all, size: 82)
+                            CategorySymbol(category: .all)
+                                .frame(width: 82, height: 82)
                         }
                         .padding(22)
                         .background(Color.seafoam, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
@@ -147,16 +148,17 @@ struct CategoryCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            CategorySymbol(category: category, size: 104)
+            CategorySymbol(category: category)
                 .frame(maxWidth: .infinity)
+                .frame(height: 112)
             Text(category.title).font(.headline).foregroundStyle(Color.ink)
             Text(category.subtitle)
                 .font(.caption)
                 .foregroundStyle(.secondary)
-                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .padding(10)
-        .frame(width: 190)
+        .frame(width: 220)
         .background(.white, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
         .shadow(color: .black.opacity(0.08), radius: 10, y: 5)
     }
@@ -164,23 +166,15 @@ struct CategoryCard: View {
 
 struct CategorySymbol: View {
     let category: SeafoodCategory
-    let size: CGFloat
 
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: size * 0.18, style: .continuous)
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
                 .fill(category.tintColor)
             Image(systemName: category.symbolName)
-                .font(.system(size: size * 0.34, weight: .semibold))
+                .font(.system(size: 38, weight: .semibold))
                 .foregroundStyle(Color.ocean)
-            Image(systemName: category.badgeSymbolName)
-                .font(.system(size: size * 0.14, weight: .bold))
-                .foregroundStyle(Color.ocean)
-                .padding(size * 0.09)
-                .background(.white.opacity(0.82), in: Circle())
-                .offset(x: size * 0.30, y: -size * 0.28)
         }
-        .frame(width: size, height: size)
     }
 }
 
