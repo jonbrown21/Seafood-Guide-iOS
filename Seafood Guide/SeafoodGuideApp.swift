@@ -3,11 +3,12 @@ import SwiftUI
 @main
 struct SeafoodGuideApp: App {
     @StateObject private var store = GuideStore()
+    @State private var contentReady = false
 
     var body: some Scene {
         WindowGroup {
             Group {
-                if store.isLoaded {
+                if store.isLoaded && contentReady {
                     GuideRootView(store: store)
                         .transition(.opacity)
                 } else {
@@ -17,9 +18,12 @@ struct SeafoodGuideApp: App {
             }
             .tint(.ocean)
             .task {
+                async let minimumPlaceholderTime: Void = Task.sleep(for: .milliseconds(450))
                 await store.load()
+                _ = try? await minimumPlaceholderTime
+                contentReady = true
             }
-            .animation(.easeOut(duration: 0.2), value: store.isLoaded)
+            .animation(.easeOut(duration: 0.2), value: contentReady)
         }
     }
 }
@@ -206,7 +210,6 @@ private struct SkeletonLine: View {
     var body: some View {
         RoundedRectangle(cornerRadius: min(height / 2, 8), style: .continuous)
             .fill(Color.ink.opacity(opacity))
-            .frame(maxWidth: width == nil ? .infinity : nil)
-            .frame(width: width, height: height)
+            .frame(maxWidth: width ?? .infinity, minHeight: height, maxHeight: height)
     }
 }

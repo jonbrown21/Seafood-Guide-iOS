@@ -13,6 +13,7 @@
 		A10000040000000000000001 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000040000000000000001 /* Theme.swift */; };
 		A10000050000000000000001 /* GuideViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000050000000000000001 /* GuideViews.swift */; };
 		A10000170000000000000001 /* Seafood/DataSource/seafood.xml in Resources */ = {isa = PBXBuildFile; fileRef = A20000170000000000000001 /* Seafood/DataSource/seafood.xml */; };
+		A10000180000000000000001 /* LaunchColors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A20000180000000000000001 /* LaunchColors.xcassets */; };
 		A10000110000000000000001 /* Lingo/DataSource/ios-lingo.xml in Resources */ = {isa = PBXBuildFile; fileRef = A20000110000000000000001 /* Lingo/DataSource/ios-lingo.xml */; };
 		A10000120000000000000001 /* Top 10/DataSource/ios-news.xml in Resources */ = {isa = PBXBuildFile; fileRef = A20000120000000000000001 /* Top 10/DataSource/ios-news.xml */; };
 		A10000130000000000000001 /* About/DataSource/ios-about-1.xml in Resources */ = {isa = PBXBuildFile; fileRef = A20000130000000000000001 /* About/DataSource/ios-about-1.xml */; };
@@ -29,6 +30,7 @@
 		A20000040000000000000001 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		A20000050000000000000001 /* GuideViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuideViews.swift; sourceTree = "<group>"; };
 		A20000170000000000000001 /* Seafood/DataSource/seafood.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Seafood/DataSource/seafood.xml; sourceTree = "<group>"; };
+		A20000180000000000000001 /* LaunchColors.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = LaunchColors.xcassets; sourceTree = "<group>"; };
 		A20000110000000000000001 /* Lingo/DataSource/ios-lingo.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Lingo/DataSource/ios-lingo.xml"; sourceTree = "<group>"; };
 		A20000120000000000000001 /* Top 10/DataSource/ios-news.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Top 10/DataSource/ios-news.xml"; sourceTree = "<group>"; };
 		A20000130000000000000001 /* About/DataSource/ios-about-1.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "About/DataSource/ios-about-1.xml"; sourceTree = "<group>"; };
@@ -64,6 +66,7 @@
 			isa = PBXGroup;
 			children = (
 				FCDEA6C2303D34CF00FFCBC7 /* Appicon.icon */,
+				A20000180000000000000001 /* LaunchColors.xcassets */,
 				A20000010000000000000001 /* SeafoodGuideApp.swift */,
 				A20000020000000000000001 /* Models.swift */,
 				A20000030000000000000001 /* GuideStore.swift */,
@@ -153,6 +156,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A10000180000000000000001 /* LaunchColors.xcassets in Resources */,
 				A10000110000000000000001 /* Lingo/DataSource/ios-lingo.xml in Resources */,
 				A10000120000000000000001 /* Top 10/DataSource/ios-news.xml in Resources */,
 				A10000130000000000000001 /* About/DataSource/ios-about-1.xml in Resources */,

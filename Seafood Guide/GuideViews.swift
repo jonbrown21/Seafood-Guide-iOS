@@ -79,13 +79,14 @@ private struct CompactExploreView: View {
                                     SeafoodListView(category: category, store: store)
                                 } label: {
                                     CategoryCard(category: category)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 10)
                                 }
                                 .buttonStyle(.plain)
                                 .containerRelativeFrame(.horizontal, count: 1, span: 1, spacing: 14)
                             }
                         }
                         .scrollTargetLayout()
-                        .padding(.vertical, 4)
                     }
                     .scrollTargetBehavior(.viewAligned(limitBehavior: .always))
                     .scrollBounceBehavior(.basedOnSize)
