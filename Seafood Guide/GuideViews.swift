@@ -416,21 +416,84 @@ struct SeafoodListView: View {
     private var filtered: [SeafoodEntry] {
         let entries = store.seafood(in: category)
         guard !query.isEmpty else { return entries }
-        return entries.filter { $0.name.localizedCaseInsensitiveContains(query) || $0.region.localizedCaseInsensitiveContains(query) }
+        return entries.filter {
+            $0.name.localizedCaseInsensitiveContains(query)
+                || $0.description.localizedCaseInsensitiveContains(query)
+                || $0.region.localizedCaseInsensitiveContains(query)
+        }
     }
 
     var body: some View {
         List(filtered) { fish in
             NavigationLink { SeafoodDetailView(entry: fish) } label: {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(fish.name).font(.headline)
-                    Text(fish.advice).font(.subheadline).foregroundStyle(.secondary).lineLimit(1)
-                }
-                .padding(.vertical, 5)
+                SeafoodListRow(entry: fish)
             }
+            .listRowSeparator(.hidden)
+            .listRowBackground(Color.clear)
+            .listRowInsets(.init(top: 6, leading: 16, bottom: 6, trailing: 16))
         }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .background(OceanBackground())
         .navigationTitle(category.title)
         .searchable(text: $query, prompt: "Search seafood")
+    }
+}
+
+private struct SeafoodListRow: View {
+    let entry: SeafoodEntry
+
+    private var category: SeafoodCategory {
+        SeafoodCategory(rawValue: entry.categoryIndex) ?? .other
+    }
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: category.symbolName)
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(Color.ocean)
+                .frame(width: 46, height: 46)
+                .background(category.tintColor, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+
+            VStack(alignment: .leading, spacing: 7) {
+                Text(entry.name)
+                    .font(.headline)
+                    .foregroundStyle(Color.ink)
+
+                Text(entry.description)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                SeafoodGuidanceBadge(status: entry.status)
+            }
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.white.opacity(0.9), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+    }
+}
+
+private struct SeafoodGuidanceBadge: View {
+    let status: String
+
+    private var appearance: (title: String, symbol: String, color: Color) {
+        switch status {
+        case "best": ("Best choice", "checkmark", .seafoam)
+        case "good": ("Good choice", "minus", .sunshine)
+        case "avoid": ("Highest mercury", "exclamationmark", .coral)
+        default: ("Check guidance", "questionmark", .sky)
+        }
+    }
+
+    var body: some View {
+        Label(appearance.title, systemImage: appearance.symbol)
+            .font(.caption2.weight(.bold))
+            .foregroundStyle(Color.ink)
+            .padding(.horizontal, 9)
+            .padding(.vertical, 6)
+            .background(appearance.color, in: Capsule())
     }
 }
 
