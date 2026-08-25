@@ -783,6 +783,7 @@ struct SeafoodDetailView: View {
     }
 
     private func renderShareImage() -> SeafoodShareImage? {
+        let category = SeafoodCategory(rawValue: entry.categoryIndex) ?? .other
         let card = SeafoodShareCard(
             name: entry.name,
             metadataLabel: metadata.label,
@@ -795,12 +796,20 @@ struct SeafoodDetailView: View {
         let renderer = ImageRenderer(content: card)
         renderer.scale = 1
 
-        guard let data = renderer.uiImage?.pngData() else { return nil }
+        let previewRenderer = ImageRenderer(content: SeafoodSharePreviewIcon(category: category))
+        previewRenderer.scale = 1
+
+        guard let data = renderer.uiImage?.pngData(),
+              let previewData = previewRenderer.uiImage?.pngData() else { return nil }
         let safeName = entry.name
             .components(separatedBy: CharacterSet.alphanumerics.inverted)
             .filter { !$0.isEmpty }
             .joined(separator: "-")
-        return SeafoodShareImage(data: data, filename: "Seafood-Guide-\(safeName).png")
+        return SeafoodShareImage(
+            data: data,
+            previewData: previewData,
+            filename: "Seafood-Guide-\(safeName).png"
+        )
     }
 }
 
@@ -920,10 +929,11 @@ private struct ReminderListPicker: View {
 
 struct SeafoodShareImage: Transferable {
     let data: Data
+    let previewData: Data
     let filename: String
 
     var previewImage: Image {
-        if let image = UIImage(data: data) {
+        if let image = UIImage(data: previewData) {
             return Image(uiImage: image)
         }
         return Image(systemName: "fish.fill")
@@ -936,6 +946,21 @@ struct SeafoodShareImage: Transferable {
         .suggestedFileName { image in
             image.filename
         }
+    }
+}
+
+private struct SeafoodSharePreviewIcon: View {
+    let category: SeafoodCategory
+
+    var body: some View {
+        ZStack {
+            category.tintColor
+
+            Image(systemName: category.symbolName)
+                .font(.system(size: 92, weight: .semibold))
+                .foregroundStyle(Color.ocean)
+        }
+        .frame(width: 256, height: 256)
     }
 }
 
