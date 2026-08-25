@@ -1778,6 +1778,7 @@ struct AboutView: View {
                         }
                     }
                     .padding(20)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .background(.white.opacity(0.84), in: RoundedRectangle(cornerRadius: 26, style: .continuous))
 
                     ForEach(Array(sections.enumerated()), id: \.element.id) { sectionIndex, section in
