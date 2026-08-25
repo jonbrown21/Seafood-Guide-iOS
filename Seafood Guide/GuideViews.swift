@@ -121,15 +121,11 @@ private struct TabletExploreView: View {
                         .background(.white.opacity(0.82), in: Capsule())
                 }
 
-                LazyVGrid(
-                    columns: [GridItem(.flexible(), spacing: 16), GridItem(.flexible())],
-                    alignment: .leading,
-                    spacing: 16
-                ) {
-                    BrowseAllCard(store: store, presentation: .wide)
-                        .gridCellAnchor(.top)
-                    GuidanceOverviewCard()
-                        .gridCellAnchor(.top)
+                Grid(horizontalSpacing: 16) {
+                    GridRow(alignment: .top) {
+                        BrowseAllCard(store: store, presentation: .wide)
+                        GuidanceOverviewCard()
+                    }
                 }
 
                 VStack(alignment: .leading, spacing: 16) {
@@ -206,6 +202,11 @@ private struct BrowseAllCard: View {
                     .frame(width: presentation == .wide ? 104 : 82, height: presentation == .wide ? 104 : 82)
             }
             .padding(presentation == .wide ? 28 : 22)
+            .frame(
+                maxWidth: .infinity,
+                maxHeight: presentation == .wide ? .infinity : nil,
+                alignment: .leading
+            )
             .background(Color.seafoam, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
             .overlay(alignment: .topTrailing) {
                 Image(systemName: "sparkles")
@@ -242,7 +243,7 @@ private struct GuidanceOverviewCard: View {
             }
         }
         .padding(28)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(.white, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
         .shadow(color: .black.opacity(0.06), radius: 12, y: 6)
     }
