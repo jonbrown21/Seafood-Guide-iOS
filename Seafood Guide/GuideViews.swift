@@ -13,12 +13,12 @@ struct GuideRootView: View {
             Tab("Glossary", systemImage: "books.vertical.fill") {
                 NavigationStack { ArticleListView(title: "Seafood glossary", articles: store.glossary) }
             }
-            Tab("10 Problems", systemImage: "exclamationmark.triangle.fill") {
+            Tab("Risks", systemImage: "exclamationmark.shield.fill") {
                 NavigationStack {
                     ArticleListView(
-                        title: "Top 10 Problems",
-                        articles: store.aquacultureProblems,
-                        presentation: .problems
+                        title: "Aquaculture risks",
+                        articles: store.aquacultureRisks,
+                        presentation: .risks
                     )
                 }
             }
@@ -324,15 +324,15 @@ private struct LearnSection: View {
                 }
                 NavigationLink {
                     ArticleListView(
-                        title: "Top 10 Problems",
-                        articles: store.aquacultureProblems,
-                        presentation: .problems
+                        title: "Aquaculture risks",
+                        articles: store.aquacultureRisks,
+                        presentation: .risks
                     )
                 } label: {
                     GuideShortcutCard(
-                        title: "Top 10 problems",
-                        subtitle: "Understand the risks of open-ocean aquaculture",
-                        symbol: "exclamationmark.octagon.fill",
+                        title: "Aquaculture risks",
+                        subtitle: "Know what to examine before choosing farmed seafood",
+                        symbol: "exclamationmark.shield.fill",
                         color: .coral
                     )
                 }
@@ -424,18 +424,27 @@ struct SeafoodListView: View {
         }
     }
 
+    private let columns = [GridItem(.adaptive(minimum: 310, maximum: 540), spacing: 14)]
+
     var body: some View {
-        List(filtered) { fish in
-            NavigationLink { SeafoodDetailView(entry: fish) } label: {
-                SeafoodListRow(entry: fish)
+        ZStack {
+            OceanBackground()
+
+            ScrollView {
+                LazyVGrid(columns: columns, alignment: .leading, spacing: 14) {
+                    ForEach(filtered) { fish in
+                        NavigationLink { SeafoodDetailView(entry: fish) } label: {
+                            SeafoodListRow(entry: fish)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .frame(maxWidth: 1180)
+                .frame(maxWidth: .infinity, alignment: .top)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 18)
             }
-            .listRowSeparator(.hidden)
-            .listRowBackground(Color.clear)
-            .listRowInsets(.init(top: 6, leading: 16, bottom: 6, trailing: 16))
         }
-        .listStyle(.plain)
-        .scrollContentBackground(.hidden)
-        .background(OceanBackground())
         .navigationTitle(category.title)
         .searchable(text: $query, prompt: "Search seafood")
     }
@@ -469,10 +478,27 @@ private struct SeafoodListRow: View {
 
                 SeafoodGuidanceBadge(status: entry.status)
             }
+
+            Spacer(minLength: 4)
+
+            CardChevron()
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         .background(.white.opacity(0.9), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .shadow(color: .black.opacity(0.055), radius: 9, y: 4)
+    }
+}
+
+private struct CardChevron: View {
+    var body: some View {
+        Image(systemName: "chevron.right")
+            .font(.caption.weight(.bold))
+            .foregroundStyle(Color.ocean)
+            .frame(width: 30, height: 30)
+            .background(Color.sky.opacity(0.7), in: Circle())
+            .accessibilityHidden(true)
     }
 }
 
@@ -812,7 +838,7 @@ struct SeafoodShareCard: View {
 
 enum ArticlePresentation {
     case reference
-    case problems
+    case risks
 }
 
 struct ArticleListView: View {
@@ -832,33 +858,135 @@ struct ArticleListView: View {
         return articles.filter { $0.title.localizedCaseInsensitiveContains(query) || $0.body.localizedCaseInsensitiveContains(query) }
     }
 
+    private var introduction: String {
+        switch presentation {
+        case .reference:
+            "Plain-language definitions for labels, fishing methods, habitats, and seafood sourcing."
+        case .risks:
+            "Aquaculture is not one system. Explore the environmental, animal-health, food-safety, and community factors that can vary by farm."
+        }
+    }
+
+    private var headerSymbol: String {
+        presentation == .risks ? "exclamationmark.shield.fill" : "text.book.closed.fill"
+    }
+
+    private var headerColor: Color {
+        presentation == .risks ? .coral : .sky
+    }
+
+    private let columns = [GridItem(.adaptive(minimum: 300, maximum: 520), spacing: 14)]
+
     var body: some View {
-        List(filtered) { article in
-            NavigationLink { ArticleDetailView(article: article, presentation: presentation) } label: {
-                HStack(spacing: 14) {
-                    Image(systemName: presentation == .problems ? "exclamationmark.triangle.fill" : "book.pages.fill")
-                        .font(.title2)
-                        .foregroundStyle(presentation == .problems ? Color.red : Color.ocean)
-                        .frame(width: 42, height: 42)
-                        .background(
-                            presentation == .problems ? Color.coral.opacity(0.55) : Color.seafoam,
-                            in: RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        )
-                    VStack(alignment: .leading, spacing: 4) {
-                        if let number = article.number {
-                            Text("PROBLEM \(number)")
+        ZStack {
+            OceanBackground()
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: 22) {
+                    HStack(alignment: .top, spacing: 18) {
+                        Image(systemName: headerSymbol)
+                            .font(.system(size: 28, weight: .semibold))
+                            .foregroundStyle(Color.ocean)
+                            .frame(width: 62, height: 62)
+                            .background(headerColor, in: RoundedRectangle(cornerRadius: 19, style: .continuous))
+
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("\(articles.count) topics")
                                 .font(.caption.weight(.bold))
-                                .foregroundStyle(presentation == .problems ? Color.red : Color.ocean)
+                                .tracking(1.1)
+                                .foregroundStyle(Color.ocean)
+                            Text(introduction)
+                                .font(.title3)
+                                .foregroundStyle(Color.ink.opacity(0.72))
+                                .fixedSize(horizontal: false, vertical: true)
                         }
-                        Text(article.title).font(.headline)
+                    }
+                    .padding(20)
+                    .background(.white.opacity(0.82), in: RoundedRectangle(cornerRadius: 26, style: .continuous))
+
+                    LazyVGrid(columns: columns, alignment: .leading, spacing: 14) {
+                        ForEach(filtered) { article in
+                            NavigationLink { ArticleDetailView(article: article, presentation: presentation) } label: {
+                                ArticleCard(article: article, presentation: presentation)
+                            }
+                            .buttonStyle(.plain)
+                        }
                     }
                 }
-                .padding(.vertical, 5)
+                .frame(maxWidth: 1180)
+                .frame(maxWidth: .infinity, alignment: .top)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 18)
             }
         }
         .navigationTitle(title)
-        .searchable(text: $query, prompt: "Search articles")
+        .searchable(text: $query, prompt: presentation == .risks ? "Search risks" : "Search glossary")
     }
+}
+
+private struct ArticleCard: View {
+    let article: GuideArticle
+    let presentation: ArticlePresentation
+
+    private var symbol: String {
+        articleSymbol(for: article.title, presentation: presentation)
+    }
+
+    private var color: Color {
+        if presentation == .reference { return .seafoam }
+        let palette: [Color] = [.coral, .sunshine, .sky, .lavender, .sand, .seafoam]
+        return palette[(article.number ?? article.title.count) % palette.count]
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .top) {
+                Image(systemName: symbol)
+                    .font(.title2.weight(.semibold))
+                    .foregroundStyle(Color.ocean)
+                    .frame(width: 50, height: 50)
+                    .background(color, in: RoundedRectangle(cornerRadius: 15, style: .continuous))
+                Spacer()
+                CardChevron()
+            }
+
+            Text(article.title)
+                .font(.title3.weight(.bold))
+                .foregroundStyle(Color.ink)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Text(article.body)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .lineLimit(3)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(17)
+        .frame(maxWidth: .infinity, minHeight: 190, alignment: .topLeading)
+        .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .background(.white.opacity(0.9), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .shadow(color: .black.opacity(0.055), radius: 9, y: 4)
+    }
+}
+
+private func articleSymbol(for title: String, presentation: ArticlePresentation) -> String {
+    let value = title.lowercased()
+    let matches: [(String, String)] = [
+        ("habitat", "water.waves"), ("waste", "drop.triangle.fill"),
+        ("escape", "figure.run"), ("disease", "cross.case.fill"),
+        ("parasite", "allergens.fill"), ("feed", "leaf.fill"),
+        ("wildlife", "bird.fill"), ("medicine", "pills.fill"),
+        ("chemical", "testtube.2"), ("weather", "cloud.bolt.rain.fill"),
+        ("climate", "thermometer.high"), ("ocean", "sailboat.fill"),
+        ("oversight", "checkmark.seal.fill"), ("biosecurity", "shield.lefthalf.filled"),
+        ("food safety", "fork.knife"), ("welfare", "heart.fill"),
+        ("community", "person.3.fill"), ("water", "drop.fill"),
+        ("label", "tag.fill"), ("stock", "chart.line.uptrend.xyaxis"),
+        ("trawl", "water.waves.and.arrow.trianglehead.down"), ("line", "point.topleft.down.to.point.bottomright.curvepath"),
+        ("net", "circle.grid.cross.fill"), ("farm", "building.2.crop.circle.fill")
+    ]
+    return matches.first(where: { value.contains($0.0) })?.1
+        ?? (presentation == .risks ? "exclamationmark.shield.fill" : "text.book.closed.fill")
 }
 
 struct ArticleDetailView: View {
@@ -873,13 +1001,13 @@ struct ArticleDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                Image(systemName: presentation == .problems ? "exclamationmark.triangle.fill" : "book.pages.fill")
+                Image(systemName: articleSymbol(for: article.title, presentation: presentation))
                     .font(.system(size: 42, weight: .semibold))
-                    .foregroundStyle(presentation == .problems ? Color.red : Color.ocean)
+                    .foregroundStyle(Color.ocean)
                     .frame(maxWidth: .infinity)
                     .frame(height: 150)
                     .background(
-                        presentation == .problems ? Color.coral.opacity(0.55) : Color.seafoam,
+                        presentation == .risks ? Color.coral.opacity(0.6) : Color.seafoam,
                         in: RoundedRectangle(cornerRadius: 20, style: .continuous)
                     )
                 Text(article.title).font(.system(size: 32, weight: .bold, design: .rounded))
@@ -927,21 +1055,113 @@ struct SourceLinksView: View {
 struct AboutView: View {
     let sections: [GuideSection]
 
+    private let columns = [GridItem(.adaptive(minimum: 300, maximum: 520), spacing: 14)]
+
     var body: some View {
-        List {
-            ForEach(sections) { section in
-                Section(section.title) {
-                    ForEach(section.articles) { article in
-                        NavigationLink(article.title) { ArticleDetailView(article: article) }
+        ZStack {
+            OceanBackground()
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: 28) {
+                    HStack(alignment: .top, spacing: 18) {
+                        Image(systemName: "info.bubble.fill")
+                            .font(.system(size: 28, weight: .semibold))
+                            .foregroundStyle(Color.ocean)
+                            .frame(width: 62, height: 62)
+                            .background(Color.lavender, in: RoundedRectangle(cornerRadius: 19, style: .continuous))
+
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("ABOUT THE GUIDE")
+                                .font(.caption.weight(.bold))
+                                .tracking(1.2)
+                                .foregroundStyle(Color.ocean)
+                            Text("Make the guide work for you.")
+                                .font(.title2.weight(.bold))
+                                .foregroundStyle(Color.ink)
+                            Text("Understand the recommendations, ask better questions, and know where the information comes from.")
+                                .font(.body)
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
                     }
+                    .padding(20)
+                    .background(.white.opacity(0.84), in: RoundedRectangle(cornerRadius: 26, style: .continuous))
+
+                    ForEach(Array(sections.enumerated()), id: \.element.id) { sectionIndex, section in
+                        VStack(alignment: .leading, spacing: 14) {
+                            Text(section.title)
+                                .font(.title2.weight(.bold))
+                                .foregroundStyle(Color.ink)
+
+                            LazyVGrid(columns: columns, alignment: .leading, spacing: 14) {
+                                ForEach(section.articles) { article in
+                                    NavigationLink { ArticleDetailView(article: article) } label: {
+                                        AboutArticleCard(article: article, colorIndex: sectionIndex)
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                        }
+                    }
+
+                    VStack(alignment: .leading, spacing: 10) {
+                        Label("A guide, not a local advisory", systemImage: "location.magnifyingglass")
+                            .font(.headline)
+                            .foregroundStyle(Color.ink)
+                        Text("Seafood Guide explains terminology, species information, sustainability considerations, and sourcing practices. Check current local advisories before making consumption decisions.")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .padding(20)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.sunshine.opacity(0.72), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
                 }
-            }
-            Section("About this app") {
-                Text("Seafood Guide helps you learn seafood terminology, species information, sustainability considerations, and sourcing practices.")
-                Text("Content is provided for educational purposes. Check current local advisories before making decisions about seafood consumption.")
-                    .foregroundStyle(.secondary)
+                .frame(maxWidth: 1180)
+                .frame(maxWidth: .infinity, alignment: .top)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 18)
             }
         }
         .navigationTitle("About")
+    }
+}
+
+private struct AboutArticleCard: View {
+    let article: GuideArticle
+    let colorIndex: Int
+
+    private var color: Color {
+        [Color.seafoam, .sky, .lavender, .sunshine][colorIndex % 4]
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .top) {
+                Image(systemName: articleSymbol(for: article.title, presentation: .reference))
+                    .font(.title2.weight(.semibold))
+                    .foregroundStyle(Color.ocean)
+                    .frame(width: 50, height: 50)
+                    .background(color, in: RoundedRectangle(cornerRadius: 15, style: .continuous))
+                Spacer()
+                CardChevron()
+            }
+
+            Text(article.title)
+                .font(.title3.weight(.bold))
+                .foregroundStyle(Color.ink)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Text(article.body)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .lineLimit(3)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(17)
+        .frame(maxWidth: .infinity, minHeight: 190, alignment: .topLeading)
+        .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .background(.white.opacity(0.9), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .shadow(color: .black.opacity(0.055), radius: 9, y: 4)
     }
 }

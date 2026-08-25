@@ -6,7 +6,7 @@ final class GuideStore: ObservableObject {
     @Published private(set) var isLoaded = false
     @Published private(set) var seafood: [SeafoodEntry] = []
     @Published private(set) var glossary: [GuideArticle] = []
-    @Published private(set) var aquacultureProblems: [GuideArticle] = []
+    @Published private(set) var aquacultureRisks: [GuideArticle] = []
     @Published private(set) var aboutSections: [GuideSection] = []
 
     func load() async {
@@ -15,7 +15,7 @@ final class GuideStore: ObservableObject {
 
         seafood = SeafoodXMLParser.entries(named: "seafood")
         glossary = ResourceXMLParser.articles(named: "ios-lingo")
-        aquacultureProblems = ResourceXMLParser.articles(named: "ios-news")
+        aquacultureRisks = ResourceXMLParser.articles(named: "ios-news")
         aboutSections = Self.loadAboutSections()
         isLoaded = true
     }
