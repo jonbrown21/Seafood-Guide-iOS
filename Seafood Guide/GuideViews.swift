@@ -412,6 +412,7 @@ struct SeafoodListView: View {
     let category: SeafoodCategory
     @ObservedObject var store: GuideStore
     @State private var query = ""
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     private var filtered: [SeafoodEntry] {
         let entries = store.seafood(in: category)
@@ -423,29 +424,132 @@ struct SeafoodListView: View {
         }
     }
 
-    private let columns = [GridItem(.adaptive(minimum: 310, maximum: 540), spacing: 14)]
+    private let compactColumns = [GridItem(.adaptive(minimum: 310, maximum: 540), spacing: 14)]
+    private let tabletColumns = [GridItem(.flexible(), spacing: 18), GridItem(.flexible())]
 
     var body: some View {
         ZStack {
             OceanBackground()
 
             ScrollView {
-                LazyVGrid(columns: columns, alignment: .leading, spacing: 14) {
-                    ForEach(filtered) { fish in
-                        NavigationLink { SeafoodDetailView(entry: fish) } label: {
-                            SeafoodListRow(entry: fish)
+                if horizontalSizeClass == .regular {
+                    VStack(alignment: .leading, spacing: 22) {
+                        TabletSeafoodListHeader(category: category, count: filtered.count)
+
+                        LazyVGrid(columns: tabletColumns, alignment: .leading, spacing: 18) {
+                            ForEach(filtered) { fish in
+                                NavigationLink { SeafoodDetailView(entry: fish) } label: {
+                                    TabletSeafoodListCard(entry: fish)
+                                }
+                                .buttonStyle(.plain)
+                            }
                         }
-                        .buttonStyle(.plain)
                     }
+                    .frame(maxWidth: 1280)
+                    .frame(maxWidth: .infinity, alignment: .top)
+                    .padding(.horizontal, 28)
+                    .padding(.vertical, 24)
+                } else {
+                    LazyVGrid(columns: compactColumns, alignment: .leading, spacing: 14) {
+                        ForEach(filtered) { fish in
+                            NavigationLink { SeafoodDetailView(entry: fish) } label: {
+                                SeafoodListRow(entry: fish)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .frame(maxWidth: 1180)
+                    .frame(maxWidth: .infinity, alignment: .top)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 18)
                 }
-                .frame(maxWidth: 1180)
-                .frame(maxWidth: .infinity, alignment: .top)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 18)
             }
         }
         .navigationTitle(category.title)
         .searchable(text: $query, prompt: "Search seafood")
+    }
+}
+
+private struct TabletSeafoodListHeader: View {
+    let category: SeafoodCategory
+    let count: Int
+
+    var body: some View {
+        HStack(spacing: 22) {
+            CategorySymbol(category: category)
+                .frame(width: 88, height: 88)
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text(category.title)
+                    .font(.system(size: 30, weight: .bold, design: .rounded))
+                    .foregroundStyle(Color.ink)
+                Text(category.subtitle)
+                    .font(.title3)
+                    .foregroundStyle(Color.ink.opacity(0.7))
+            }
+
+            Spacer(minLength: 20)
+
+            Label("\(count) profiles", systemImage: "square.grid.2x2.fill")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Color.ocean)
+                .padding(.horizontal, 15)
+                .padding(.vertical, 10)
+                .background(.white.opacity(0.8), in: Capsule())
+        }
+        .padding(22)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(category.tintColor.opacity(0.78), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+    }
+}
+
+private struct TabletSeafoodListCard: View {
+    let entry: SeafoodEntry
+
+    private var category: SeafoodCategory {
+        SeafoodCategory(rawValue: entry.categoryIndex) ?? .other
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 15) {
+            HStack(alignment: .top, spacing: 14) {
+                Image(systemName: category.symbolName)
+                    .font(.title2.weight(.semibold))
+                    .foregroundStyle(Color.ocean)
+                    .frame(width: 56, height: 56)
+                    .background(category.tintColor, in: RoundedRectangle(cornerRadius: 17, style: .continuous))
+
+                VStack(alignment: .leading, spacing: 7) {
+                    Text(entry.name)
+                        .font(.title3.weight(.bold))
+                        .foregroundStyle(Color.ink)
+                        .fixedSize(horizontal: false, vertical: true)
+                    SeafoodGuidanceBadge(status: entry.status)
+                }
+
+                Spacer(minLength: 8)
+                CardChevron()
+            }
+
+            Text(entry.description)
+                .font(.body)
+                .foregroundStyle(Color.ink.opacity(0.72))
+                .lineLimit(4)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if !entry.region.isEmpty {
+                Label(entry.region, systemImage: "tag.fill")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(Color.ocean)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .topLeading)
+        .contentShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .background(.white.opacity(0.9), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .shadow(color: .black.opacity(0.05), radius: 10, y: 5)
     }
 }
 
