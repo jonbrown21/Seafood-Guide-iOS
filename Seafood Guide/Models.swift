@@ -61,6 +61,11 @@ struct GuideSection: Identifiable, Hashable {
 enum SeafoodCategory: Int, CaseIterable, Identifiable {
     case mild, flavorful, steak, small, shellfish, other, all, dirtyDozen
 
+    static let homeFeatured: SeafoodCategory = .steak
+    static let homeCarouselOrder: [SeafoodCategory] = [
+        homeFeatured, .mild, .flavorful, .small, .shellfish, .other, .dirtyDozen
+    ]
+
     var id: Int { rawValue }
 
     init?(xmlValue: String) {

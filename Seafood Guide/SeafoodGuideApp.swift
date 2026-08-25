@@ -57,7 +57,7 @@ private struct CompactLaunchPlaceholder: View {
 
             VStack(alignment: .leading, spacing: 14) {
                 SkeletonLine(width: 190, height: 22, opacity: 0.14)
-                SkeletonCategoryCard(color: .sunshine)
+                SkeletonCategoryCard(color: SeafoodCategory.homeFeatured.tintColor)
             }
 
             VStack(alignment: .leading, spacing: 14) {

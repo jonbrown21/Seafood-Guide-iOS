@@ -75,7 +75,7 @@ private struct CompactExploreView: View {
 
                     ScrollView(.horizontal, showsIndicators: false) {
                         LazyHStack(spacing: 14) {
-                            ForEach(SeafoodCategory.allCases.filter { $0 != .all }) { category in
+                            ForEach(SeafoodCategory.homeCarouselOrder) { category in
                                 NavigationLink {
                                     SeafoodListView(category: category, store: store)
                                 } label: {
