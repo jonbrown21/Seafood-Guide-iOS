@@ -1,0 +1,13 @@
+# Seafood Guide
+
+This branch is the SwiftUI rewrite of Seafood Guide. It preserves the existing bundle identifier and curated content while replacing the UIKit, Core Data, storyboard, XIB, and third-party XML dependencies with a code-only SwiftUI app.
+
+## Current scope
+
+- Eight seafood categories with searchable species lists and detail views.
+- Glossary, Top 10 educational content, and the three-section guide information area.
+- Share and email actions from seafood details.
+- Existing image catalog and educational XML content reused as app resources.
+- iOS 16.0 or later, with iPhone and iPad support.
+
+Open `Seafood Guide.xcodeproj` in Xcode and build the `Seafood Guide` scheme. The bundle identifier remains `com.jonbrown.org.Seafood-Guide`.
