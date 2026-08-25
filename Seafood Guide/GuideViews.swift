@@ -104,6 +104,7 @@ private struct CompactExploreView: View {
 
 private struct TabletExploreView: View {
     @ObservedObject var store: GuideStore
+    @State private var categoryCardHeight: CGFloat = 0
 
     private let categoryColumns = [GridItem(.adaptive(minimum: 230, maximum: 320), spacing: 16)]
 
@@ -139,11 +140,15 @@ private struct TabletExploreView: View {
                             } label: {
                                 TabletCategoryCard(
                                     category: category,
-                                    count: store.seafood(in: category).count
+                                    count: store.seafood(in: category).count,
+                                    sharedHeight: categoryCardHeight
                                 )
                             }
                             .buttonStyle(.plain)
                         }
+                    }
+                    .onPreferenceChange(TabletCategoryCardHeightKey.self) { measuredHeight in
+                        categoryCardHeight = measuredHeight
                     }
                 }
 
@@ -267,6 +272,7 @@ private struct GuidanceChip: View {
 private struct TabletCategoryCard: View {
     let category: SeafoodCategory
     let count: Int
+    let sharedHeight: CGFloat
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -288,9 +294,25 @@ private struct TabletCategoryCard: View {
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(18)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .background {
+            GeometryReader { proxy in
+                Color.clear.preference(
+                    key: TabletCategoryCardHeightKey.self,
+                    value: proxy.size.height
+                )
+            }
+        }
+        .frame(maxWidth: .infinity, minHeight: sharedHeight, alignment: .topLeading)
         .background(.white, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
         .shadow(color: .black.opacity(0.06), radius: 10, y: 5)
+    }
+}
+
+private struct TabletCategoryCardHeightKey: PreferenceKey {
+    static let defaultValue: CGFloat = 0
+
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = max(value, nextValue())
     }
 }
 
