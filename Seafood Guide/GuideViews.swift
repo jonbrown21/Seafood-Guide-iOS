@@ -636,7 +636,7 @@ struct SeafoodDetailView: View {
                                     message: Text("Explore \(entry.name) with Seafood Guide."),
                                     preview: SharePreview(
                                         "\(entry.name) • Seafood Guide",
-                                        image: Image(systemName: "fish.fill")
+                                        image: shareImage.previewImage
                                     )
                                 ) {
                                     Label("Share", systemImage: "square.and.arrow.up")
@@ -921,6 +921,13 @@ private struct ReminderListPicker: View {
 struct SeafoodShareImage: Transferable {
     let data: Data
     let filename: String
+
+    var previewImage: Image {
+        if let image = UIImage(data: data) {
+            return Image(uiImage: image)
+        }
+        return Image(systemName: "fish.fill")
+    }
 
     static var transferRepresentation: some TransferRepresentation {
         DataRepresentation(exportedContentType: .png) { image in
