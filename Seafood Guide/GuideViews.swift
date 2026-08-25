@@ -16,6 +16,7 @@ struct GuideRootView: View {
         }
         .preferredColorScheme(.light)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(minHeight: UIScreen.main.bounds.height)
         .ignoresSafeArea(.container, edges: .bottom)
     }
 }

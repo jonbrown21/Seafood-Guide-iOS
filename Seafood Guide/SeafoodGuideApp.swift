@@ -7,7 +7,7 @@ struct SeafoodGuideApp: App {
 
     var body: some Scene {
         WindowGroup {
-            GeometryReader { _ in
+            GeometryReader { geometry in
                 Group {
                     if isLoaded {
                         GuideRootView(store: store)
@@ -15,7 +15,7 @@ struct SeafoodGuideApp: App {
                         LaunchView()
                     }
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .frame(width: geometry.size.width, height: geometry.size.height)
             }
             .ignoresSafeArea()
             .tint(.ocean)
@@ -28,36 +28,69 @@ struct SeafoodGuideApp: App {
 }
 
 struct LaunchView: View {
-    @State private var isPulsing = false
+    @State private var isAnimating = false
 
     var body: some View {
         ZStack {
             OceanBackground()
-            VStack(spacing: 24) {
-                ZStack {
-                    Circle()
-                        .fill(.white.opacity(0.72))
-                        .frame(width: 132, height: 132)
-                        .scaleEffect(isPulsing ? 1.08 : 0.94)
-                        .opacity(isPulsing ? 0.55 : 0.9)
-                    Image(systemName: "fish.fill")
-                        .font(.system(size: 58, weight: .semibold))
-                        .foregroundStyle(Color.ocean)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 28) {
+                    VStack(alignment: .leading, spacing: 10) {
+                        RoundedRectangle(cornerRadius: 5, style: .continuous)
+                            .fill(Color.ocean.opacity(0.22))
+                            .frame(width: 150, height: 12)
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .fill(Color.ink.opacity(0.16))
+                            .frame(maxWidth: 280, minHeight: 34)
+                        RoundedRectangle(cornerRadius: 7, style: .continuous)
+                            .fill(Color.ink.opacity(0.10))
+                            .frame(maxWidth: 330, minHeight: 20)
+                    }
+                    .padding(.horizontal, 20)
+
+                    RoundedRectangle(cornerRadius: 28, style: .continuous)
+                        .fill(Color.seafoam.opacity(0.82))
+                        .frame(maxWidth: .infinity, minHeight: 178)
+                        .overlay {
+                            Image(systemName: "fish.fill")
+                                .font(.system(size: 52, weight: .semibold))
+                                .foregroundStyle(Color.ocean.opacity(0.45))
+                                .scaleEffect(isAnimating ? 1.06 : 0.94)
+                        }
+                        .padding(.horizontal, 20)
+
+                    VStack(alignment: .leading, spacing: 14) {
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .fill(Color.ink.opacity(0.12))
+                            .frame(width: 170, height: 20)
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 14) {
+                                ForEach(0..<3, id: \.self) { index in
+                                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                        .fill([Color.coral, Color.sunshine, Color.lavender][index].opacity(0.45))
+                                        .frame(width: 150, height: 132)
+                                }
+                            }
+                            .padding(.vertical, 2)
+                        }
+                    }
+                    .padding(.horizontal, 20)
+
+                    ProgressView()
+                        .tint(.ocean)
+                        .frame(maxWidth: .infinity)
+                        .padding(.bottom, 24)
                 }
-                Text("Seafood Guide")
-                    .font(.system(size: 34, weight: .bold, design: .rounded))
-                    .foregroundStyle(Color.ink)
-                ProgressView("Preparing your guide")
-                    .tint(.ocean)
-                    .foregroundStyle(.secondary)
+                .frame(maxWidth: 920)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.vertical, 28)
             }
-            .padding(32)
         }
         .task {
-            withAnimation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true)) { isPulsing = true }
+            withAnimation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true)) { isAnimating = true }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Seafood Guide is loading")
+        .accessibilityLabel("Loading seafood guide")
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
