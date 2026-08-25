@@ -16,47 +16,93 @@ struct GuideRootView: View {
         }
         .preferredColorScheme(.light)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .ignoresSafeArea(.container, edges: .bottom)
     }
 }
 
 struct ExploreView: View {
     @ObservedObject var store: GuideStore
-    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-
-    private var columns: [GridItem] {
-        let count = horizontalSizeClass == .regular ? 4 : 2
-        return Array(repeating: GridItem(.flexible(), spacing: 16), count: count)
-    }
 
     var body: some View {
         ZStack {
             OceanBackground()
             ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
+                VStack(alignment: .leading, spacing: 28) {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("Seafood Guide")
-                            .font(.system(size: 38, weight: .bold, design: .rounded))
-                        Text("Know what’s on your plate.")
+                        Text("SMART SEAFOOD GUIDE")
+                            .font(.caption.weight(.bold))
+                            .tracking(1.5)
+                            .foregroundStyle(Color.ocean)
+                        Text("Eat with the tide.")
+                            .font(.system(size: 42, weight: .bold, design: .rounded))
+                            .minimumScaleFactor(0.75)
+                        Text("A brighter way to explore what’s on your plate.")
                             .font(.title3)
                             .foregroundStyle(.secondary)
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, 20)
 
-                    LazyVGrid(columns: columns, spacing: 16) {
-                        ForEach(SeafoodCategory.allCases) { category in
-                            NavigationLink {
-                                SeafoodListView(category: category, store: store)
-                            } label: {
-                                CategoryCard(category: category, count: store.seafood(in: category).count)
+                    NavigationLink {
+                        SeafoodListView(category: .all, store: store)
+                    } label: {
+                        HStack(spacing: 18) {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Start exploring")
+                                    .font(.title2.weight(.bold))
+                                Text("Browse every species in the guide")
+                                    .font(.subheadline)
+                                    .foregroundStyle(Color.ink.opacity(0.7))
+                                Label("\(store.seafood.count) entries", systemImage: "arrow.right.circle.fill")
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(Color.ocean)
                             }
-                            .buttonStyle(.plain)
+                            Spacer(minLength: 8)
+                            Image(systemName: "fish.fill")
+                                .font(.system(size: 54, weight: .semibold))
+                                .foregroundStyle(Color.ocean)
+                        }
+                        .padding(22)
+                        .background(Color.seafoam, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+                        .overlay(alignment: .topTrailing) {
+                            Image(systemName: "sparkles")
+                                .font(.title3.weight(.bold))
+                                .foregroundStyle(Color.ocean.opacity(0.7))
+                                .padding(18)
                         }
                     }
-                    .padding(.horizontal)
+                    .buttonStyle(.plain)
+                    .padding(.horizontal, 20)
+
+                    VStack(alignment: .leading, spacing: 14) {
+                        HStack {
+                            Text("Browse by vibe")
+                                .font(.title3.weight(.bold))
+                            Spacer()
+                            Text("Swipe to explore")
+                                .font(.caption.weight(.medium))
+                                .foregroundStyle(.secondary)
+                        }
+                        .padding(.horizontal, 20)
+
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            LazyHStack(spacing: 14) {
+                                ForEach(SeafoodCategory.allCases.filter { $0 != .all }) { category in
+                                    NavigationLink {
+                                        SeafoodListView(category: category, store: store)
+                                    } label: {
+                                        CategoryCard(category: category, count: store.seafood(in: category).count)
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 4)
+                        }
+                    }
                 }
                 .frame(maxWidth: 920)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 24)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.vertical, 28)
             }
         }
         .navigationBarHidden(true)
@@ -74,8 +120,8 @@ struct CategoryCard: View {
                 .font(.system(size: 36, weight: .semibold))
                 .foregroundStyle(Color.ocean)
                 .frame(maxWidth: .infinity)
-                .frame(height: 116)
-                .background(Color.seafoam, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .frame(height: 104)
+                .background(category.tintColor, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
             Text(category.title).font(.headline).foregroundStyle(Color.ink)
             Text("\(count) entries · \(category.subtitle)")
                 .font(.caption)
@@ -83,7 +129,8 @@ struct CategoryCard: View {
                 .lineLimit(2)
         }
         .padding(10)
-        .background(.white.opacity(0.85), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .frame(width: 190)
+        .background(.white, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
         .shadow(color: .black.opacity(0.08), radius: 10, y: 5)
     }
 }

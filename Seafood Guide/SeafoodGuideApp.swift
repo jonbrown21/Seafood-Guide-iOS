@@ -7,14 +7,17 @@ struct SeafoodGuideApp: App {
 
     var body: some Scene {
         WindowGroup {
-            Group {
-                if isLoaded {
-                    GuideRootView(store: store)
-                } else {
-                    LaunchView()
+            GeometryReader { _ in
+                Group {
+                    if isLoaded {
+                        GuideRootView(store: store)
+                    } else {
+                        LaunchView()
+                    }
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .ignoresSafeArea()
             .tint(.ocean)
             .task {
                 try? await Task.sleep(nanoseconds: 650_000_000)

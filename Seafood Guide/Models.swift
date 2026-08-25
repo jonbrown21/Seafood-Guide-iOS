@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 struct SeafoodEntry: Identifiable, Hashable {
     let id = UUID()
@@ -61,6 +62,19 @@ enum SeafoodCategory: Int, CaseIterable, Identifiable {
         case .other: "Everything else from the sea"
         case .all: "Browse the complete guide"
         case .dirtyDozen: "Species to approach with care"
+        }
+    }
+
+    var tintColor: Color {
+        switch self {
+        case .mild: .seafoam
+        case .flavorful: .coral
+        case .steak: .sunshine
+        case .small: .sky
+        case .shellfish: .lavender
+        case .other: .sand
+        case .all: .seafoam
+        case .dirtyDozen: .coral
         }
     }
 }
