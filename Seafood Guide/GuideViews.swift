@@ -5,15 +5,20 @@ struct GuideRootView: View {
 
     var body: some View {
         TabView {
-            NavigationStack { ExploreView(store: store) }
-                .tabItem { Label("Explore", systemImage: "fish.fill") }
-            NavigationStack { ArticleListView(title: "Seafood glossary", articles: store.glossary) }
-                .tabItem { Label("Glossary", systemImage: "text.book.closed.fill") }
-            NavigationStack { ArticleListView(title: "Top 10", articles: store.topTen) }
-                .tabItem { Label("Top 10", systemImage: "number.circle.fill") }
-            NavigationStack { AboutView(sections: store.aboutSections) }
-                .tabItem { Label("About", systemImage: "info.circle.fill") }
+            Tab("Explore", systemImage: "safari.fill") {
+                NavigationStack { ExploreView(store: store) }
+            }
+            Tab("Glossary", systemImage: "books.vertical.fill") {
+                NavigationStack { ArticleListView(title: "Seafood glossary", articles: store.glossary) }
+            }
+            Tab("Top 10", systemImage: "medal.fill") {
+                NavigationStack { ArticleListView(title: "Top 10", articles: store.topTen) }
+            }
+            Tab("About", systemImage: "info.circle.fill") {
+                NavigationStack { AboutView(sections: store.aboutSections) }
+            }
         }
+        .tabViewStyle(.sidebarAdaptable)
         .preferredColorScheme(.light)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -26,16 +31,16 @@ struct ExploreView: View {
         ZStack {
             OceanBackground()
             ScrollView {
-                VStack(alignment: .leading, spacing: 28) {
+                VStack(alignment: .leading, spacing: 30) {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("SMART SEAFOOD GUIDE")
+                        Text("SEAFOOD GUIDE")
                             .font(.caption.weight(.bold))
                             .tracking(1.5)
                             .foregroundStyle(Color.ocean)
-                        Text("Eat with the tide.")
-                            .font(.system(size: 42, weight: .bold, design: .rounded))
-                            .minimumScaleFactor(0.75)
-                        Text("A brighter way to explore what’s on your plate.")
+                        Text("Choose seafood with confidence.")
+                            .font(.system(size: 38, weight: .bold, design: .rounded))
+                            .minimumScaleFactor(0.8)
+                        Text("Compare flavor, texture, sourcing advice, and species details.")
                             .font(.title3)
                             .foregroundStyle(.secondary)
                     }
@@ -46,19 +51,17 @@ struct ExploreView: View {
                     } label: {
                         HStack(spacing: 18) {
                             VStack(alignment: .leading, spacing: 8) {
-                                Text("Start exploring")
+                                Text("Browse all seafood")
                                     .font(.title2.weight(.bold))
-                                Text("Browse every species in the guide")
+                                Text("Find a species or discover something new")
                                     .font(.subheadline)
                                     .foregroundStyle(Color.ink.opacity(0.7))
-                                Label("\(store.seafood.count) entries", systemImage: "arrow.right.circle.fill")
+                                Label("Open the guide", systemImage: "arrow.right.circle.fill")
                                     .font(.subheadline.weight(.semibold))
                                     .foregroundStyle(Color.ocean)
                             }
                             Spacer(minLength: 8)
-                            Image(systemName: "fish.fill")
-                                .font(.system(size: 54, weight: .semibold))
-                                .foregroundStyle(Color.ocean)
+                            CategorySymbol(category: .all, size: 82)
                         }
                         .padding(22)
                         .background(Color.seafoam, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
@@ -74,10 +77,10 @@ struct ExploreView: View {
 
                     VStack(alignment: .leading, spacing: 14) {
                         HStack {
-                            Text("Browse by vibe")
+                            Text("Browse by category")
                                 .font(.title3.weight(.bold))
                             Spacer()
-                            Text("Swipe to explore")
+                            Label("Swipe", systemImage: "arrow.left.and.right")
                                 .font(.caption.weight(.medium))
                                 .foregroundStyle(.secondary)
                         }
@@ -89,7 +92,7 @@ struct ExploreView: View {
                                     NavigationLink {
                                         SeafoodListView(category: category, store: store)
                                     } label: {
-                                        CategoryCard(category: category, count: store.seafood(in: category).count)
+                                        CategoryCard(category: category)
                                     }
                                     .buttonStyle(.plain)
                                 }
@@ -98,6 +101,36 @@ struct ExploreView: View {
                             .padding(.vertical, 4)
                         }
                     }
+
+                    VStack(alignment: .leading, spacing: 14) {
+                        Text("Learn before you buy")
+                            .font(.title3.weight(.bold))
+
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 160), spacing: 12)], spacing: 12) {
+                            NavigationLink {
+                                ArticleListView(title: "Seafood glossary", articles: store.glossary)
+                            } label: {
+                                GuideShortcutCard(
+                                    title: "Seafood glossary",
+                                    subtitle: "Decode labels, terms, and sourcing language",
+                                    symbol: "books.vertical.fill",
+                                    color: .sky
+                                )
+                            }
+                            NavigationLink {
+                                ArticleListView(title: "Top 10", articles: store.topTen)
+                            } label: {
+                                GuideShortcutCard(
+                                    title: "Top 10 choices",
+                                    subtitle: "See the guide’s featured seafood picks",
+                                    symbol: "medal.fill",
+                                    color: .sunshine
+                                )
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    .padding(.horizontal, 20)
                 }
                 .frame(maxWidth: 920)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -111,18 +144,13 @@ struct ExploreView: View {
 
 struct CategoryCard: View {
     let category: SeafoodCategory
-    let count: Int
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Image(systemName: category.symbolName)
-                .font(.system(size: 36, weight: .semibold))
-                .foregroundStyle(Color.ocean)
+            CategorySymbol(category: category, size: 104)
                 .frame(maxWidth: .infinity)
-                .frame(height: 104)
-                .background(category.tintColor, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
             Text(category.title).font(.headline).foregroundStyle(Color.ink)
-            Text("\(count) entries · \(category.subtitle)")
+            Text(category.subtitle)
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .lineLimit(2)
@@ -131,6 +159,60 @@ struct CategoryCard: View {
         .frame(width: 190)
         .background(.white, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
         .shadow(color: .black.opacity(0.08), radius: 10, y: 5)
+    }
+}
+
+struct CategorySymbol: View {
+    let category: SeafoodCategory
+    let size: CGFloat
+
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: size * 0.18, style: .continuous)
+                .fill(category.tintColor)
+            Image(systemName: category.symbolName)
+                .font(.system(size: size * 0.34, weight: .semibold))
+                .foregroundStyle(Color.ocean)
+            Image(systemName: category.badgeSymbolName)
+                .font(.system(size: size * 0.14, weight: .bold))
+                .foregroundStyle(Color.ocean)
+                .padding(size * 0.09)
+                .background(.white.opacity(0.82), in: Circle())
+                .offset(x: size * 0.30, y: -size * 0.28)
+        }
+        .frame(width: size, height: size)
+    }
+}
+
+struct GuideShortcutCard: View {
+    let title: String
+    let subtitle: String
+    let symbol: String
+    let color: Color
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Image(systemName: symbol)
+                .font(.title2.weight(.semibold))
+                .foregroundStyle(Color.ocean)
+                .frame(width: 46, height: 46)
+                .background(color, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            Text(title)
+                .font(.headline)
+                .foregroundStyle(Color.ink)
+            Text(subtitle)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(3)
+            Spacer(minLength: 0)
+            Image(systemName: "arrow.up.right")
+                .font(.caption.weight(.bold))
+                .foregroundStyle(Color.ocean)
+        }
+        .frame(maxWidth: .infinity, minHeight: 158, alignment: .leading)
+        .padding(16)
+        .background(.white, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .shadow(color: .black.opacity(0.06), radius: 10, y: 5)
     }
 }
 
