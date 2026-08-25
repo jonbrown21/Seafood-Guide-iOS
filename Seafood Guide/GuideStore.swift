@@ -5,12 +5,12 @@ import Combine
 final class GuideStore: ObservableObject {
     @Published private(set) var seafood: [SeafoodEntry] = SeafoodData.entries
     @Published private(set) var glossary: [GuideArticle] = []
-    @Published private(set) var topTen: [GuideArticle] = []
+    @Published private(set) var aquacultureProblems: [GuideArticle] = []
     @Published private(set) var aboutSections: [GuideSection] = []
 
     init() {
         glossary = ResourceXMLParser.articles(named: "ios-lingo")
-        topTen = ResourceXMLParser.articles(named: "ios-news")
+        aquacultureProblems = ResourceXMLParser.articles(named: "ios-news")
         aboutSections = Self.loadAboutSections()
     }
 

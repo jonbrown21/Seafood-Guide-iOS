@@ -13,8 +13,14 @@ struct GuideRootView: View {
             Tab("Glossary", systemImage: "books.vertical.fill") {
                 NavigationStack { ArticleListView(title: "Seafood glossary", articles: store.glossary) }
             }
-            Tab("Top 10", systemImage: "medal.fill") {
-                NavigationStack { ArticleListView(title: "Top 10", articles: store.topTen) }
+            Tab("10 Problems", systemImage: "exclamationmark.triangle.fill") {
+                NavigationStack {
+                    ArticleListView(
+                        title: "Top 10 Problems",
+                        articles: store.aquacultureProblems,
+                        presentation: .problems
+                    )
+                }
             }
             Tab("About", systemImage: "info.circle.fill") {
                 NavigationStack { AboutView(sections: store.aboutSections) }
@@ -121,13 +127,17 @@ struct ExploreView: View {
                                 )
                             }
                             NavigationLink {
-                                ArticleListView(title: "Top 10", articles: store.topTen)
+                                ArticleListView(
+                                    title: "Top 10 Problems",
+                                    articles: store.aquacultureProblems,
+                                    presentation: .problems
+                                )
                             } label: {
                                 GuideShortcutCard(
-                                    title: "Top 10 choices",
-                                    subtitle: "See the guide’s featured seafood picks",
-                                    symbol: "medal.fill",
-                                    color: .sunshine
+                                    title: "Top 10 problems",
+                                    subtitle: "Understand the risks of open-ocean aquaculture",
+                                    symbol: "exclamationmark.octagon.fill",
+                                    color: .coral
                                 )
                             }
                         }
@@ -542,10 +552,22 @@ struct SeafoodShareCard: View {
     }
 }
 
+enum ArticlePresentation {
+    case reference
+    case problems
+}
+
 struct ArticleListView: View {
     let title: String
     let articles: [GuideArticle]
+    let presentation: ArticlePresentation
     @State private var query = ""
+
+    init(title: String, articles: [GuideArticle], presentation: ArticlePresentation = .reference) {
+        self.title = title
+        self.articles = articles
+        self.presentation = presentation
+    }
 
     private var filtered: [GuideArticle] {
         guard !query.isEmpty else { return articles }
@@ -554,15 +576,22 @@ struct ArticleListView: View {
 
     var body: some View {
         List(filtered) { article in
-            NavigationLink { ArticleDetailView(article: article) } label: {
+            NavigationLink { ArticleDetailView(article: article, presentation: presentation) } label: {
                 HStack(spacing: 14) {
-                    Image(systemName: article.number == nil ? "book.pages.fill" : "number.circle.fill")
+                    Image(systemName: presentation == .problems ? "exclamationmark.triangle.fill" : "book.pages.fill")
                         .font(.title2)
-                        .foregroundStyle(Color.ocean)
+                        .foregroundStyle(presentation == .problems ? Color.red : Color.ocean)
                         .frame(width: 42, height: 42)
-                        .background(Color.seafoam, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        .background(
+                            presentation == .problems ? Color.coral.opacity(0.55) : Color.seafoam,
+                            in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        )
                     VStack(alignment: .leading, spacing: 4) {
-                        if let number = article.number { Text("\(number)").font(.caption.weight(.bold)).foregroundStyle(.teal) }
+                        if let number = article.number {
+                            Text("PROBLEM \(number)")
+                                .font(.caption.weight(.bold))
+                                .foregroundStyle(presentation == .problems ? Color.red : Color.ocean)
+                        }
                         Text(article.title).font(.headline)
                     }
                 }
@@ -576,16 +605,25 @@ struct ArticleListView: View {
 
 struct ArticleDetailView: View {
     let article: GuideArticle
+    let presentation: ArticlePresentation
+
+    init(article: GuideArticle, presentation: ArticlePresentation = .reference) {
+        self.article = article
+        self.presentation = presentation
+    }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                Image(systemName: article.number == nil ? "book.pages.fill" : "text.book.closed.fill")
+                Image(systemName: presentation == .problems ? "exclamationmark.triangle.fill" : "book.pages.fill")
                     .font(.system(size: 42, weight: .semibold))
-                    .foregroundStyle(Color.ocean)
+                    .foregroundStyle(presentation == .problems ? Color.red : Color.ocean)
                     .frame(maxWidth: .infinity)
                     .frame(height: 150)
-                    .background(Color.seafoam, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                    .background(
+                        presentation == .problems ? Color.coral.opacity(0.55) : Color.seafoam,
+                        in: RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    )
                 Text(article.title).font(.system(size: 32, weight: .bold, design: .rounded))
                 Text(article.body).font(.body).lineSpacing(5)
             }
