@@ -1743,6 +1743,8 @@ struct SourceLinksView: View {
 
 struct AboutView: View {
     let sections: [GuideSection]
+    @State private var articleCardHeight: CGFloat = 0
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     private let columns = [GridItem(.adaptive(minimum: 300, maximum: 520), spacing: 14)]
 
@@ -1787,7 +1789,11 @@ struct AboutView: View {
                                     NavigationLink {
                                         ArticleDetailView(article: article, relatedArticles: section.articles)
                                     } label: {
-                                        AboutArticleCard(article: article, colorIndex: sectionIndex)
+                                        AboutArticleCard(
+                                            article: article,
+                                            colorIndex: sectionIndex,
+                                            sharedHeight: horizontalSizeClass == .regular ? articleCardHeight : 0
+                                        )
                                     }
                                     .buttonStyle(.plain)
                                 }
@@ -1808,6 +1814,11 @@ struct AboutView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color.sunshine.opacity(0.72), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
                 }
+                .onPreferenceChange(AboutArticleCardHeightKey.self) { measuredHeight in
+                    if horizontalSizeClass == .regular {
+                        articleCardHeight = measuredHeight
+                    }
+                }
                 .frame(maxWidth: 1180)
                 .frame(maxWidth: .infinity, alignment: .top)
                 .padding(.horizontal, 16)
@@ -1821,6 +1832,7 @@ struct AboutView: View {
 private struct AboutArticleCard: View {
     let article: GuideArticle
     let colorIndex: Int
+    let sharedHeight: CGFloat
 
     private var color: Color {
         [Color.seafoam, .sky, .lavender, .sunshine][colorIndex % 4]
@@ -1846,13 +1858,28 @@ private struct AboutArticleCard: View {
             Text(article.body)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
-                .lineLimit(3)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(17)
-        .frame(maxWidth: .infinity, minHeight: 190, alignment: .topLeading)
+        .background {
+            GeometryReader { proxy in
+                Color.clear.preference(
+                    key: AboutArticleCardHeightKey.self,
+                    value: proxy.size.height
+                )
+            }
+        }
+        .frame(maxWidth: .infinity, minHeight: max(190, sharedHeight), alignment: .topLeading)
         .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
         .background(.white.opacity(0.9), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
         .shadow(color: .black.opacity(0.055), radius: 9, y: 4)
+    }
+}
+
+private struct AboutArticleCardHeightKey: PreferenceKey {
+    static let defaultValue: CGFloat = 0
+
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = max(value, nextValue())
     }
 }
