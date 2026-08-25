@@ -15,12 +15,18 @@ struct GuideRootView: View {
                 .tabItem { Label("About", systemImage: "info.circle.fill") }
         }
         .preferredColorScheme(.light)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
 struct ExploreView: View {
     @ObservedObject var store: GuideStore
-    private let columns = [GridItem(.adaptive(minimum: 155), spacing: 16)]
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    private var columns: [GridItem] {
+        let count = horizontalSizeClass == .regular ? 4 : 2
+        return Array(repeating: GridItem(.flexible(), spacing: 16), count: count)
+    }
 
     var body: some View {
         ZStack {
@@ -54,6 +60,7 @@ struct ExploreView: View {
             }
         }
         .navigationBarHidden(true)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
 }
 

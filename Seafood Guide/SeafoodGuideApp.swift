@@ -14,6 +14,7 @@ struct SeafoodGuideApp: App {
                     LaunchView()
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .tint(.ocean)
             .task {
                 try? await Task.sleep(nanoseconds: 650_000_000)
@@ -54,5 +55,6 @@ struct LaunchView: View {
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Seafood Guide is loading")
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

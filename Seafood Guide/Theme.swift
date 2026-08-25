@@ -11,5 +11,6 @@ struct OceanBackground: View {
     var body: some View {
         LinearGradient(colors: [.seafoam, .sand], startPoint: .topLeading, endPoint: .bottomTrailing)
             .ignoresSafeArea()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
