@@ -18,14 +18,21 @@ struct GuideRootView: View {
                 NavigationStack { ExploreView(store: store) }
             }
             Tab("Glossary", systemImage: "books.vertical.fill") {
-                NavigationStack { ArticleListView(title: "Seafood glossary", articles: store.glossary) }
+                NavigationStack {
+                    ArticleListView(
+                        title: "Seafood glossary",
+                        articles: store.glossary,
+                        isTabRoot: true
+                    )
+                }
             }
             Tab("Risks", systemImage: "exclamationmark.shield.fill") {
                 NavigationStack {
                     ArticleListView(
                         title: "Aquaculture risks",
                         articles: store.aquacultureRisks,
-                        presentation: .risks
+                        presentation: .risks,
+                        isTabRoot: true
                     )
                 }
             }
@@ -1361,14 +1368,21 @@ struct ArticleListView: View {
     let title: String
     let articles: [GuideArticle]
     let presentation: ArticlePresentation
+    let isTabRoot: Bool
     @State private var query = ""
     @State private var articleCardHeight: CGFloat = 0
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
-    init(title: String, articles: [GuideArticle], presentation: ArticlePresentation = .reference) {
+    init(
+        title: String,
+        articles: [GuideArticle],
+        presentation: ArticlePresentation = .reference,
+        isTabRoot: Bool = false
+    ) {
         self.title = title
         self.articles = articles
         self.presentation = presentation
+        self.isTabRoot = isTabRoot
     }
 
     private var filtered: [GuideArticle] {
@@ -1393,6 +1407,10 @@ struct ArticleListView: View {
         presentation == .risks ? .coral : .sky
     }
 
+    private var searchPrompt: String {
+        presentation == .risks ? "Search risks" : "Search glossary"
+    }
+
     private let columns = [GridItem(.adaptive(minimum: 300, maximum: 520), spacing: 14)]
 
     var body: some View {
@@ -1401,6 +1419,31 @@ struct ArticleListView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
+                    if isTabRoot && horizontalSizeClass == .compact {
+                        Text(title)
+                            .font(.system(size: 34, weight: .bold, design: .rounded))
+                            .foregroundStyle(Color.ink)
+
+                        HStack(spacing: 10) {
+                            Image(systemName: "magnifyingglass")
+                                .foregroundStyle(.secondary)
+                            TextField(searchPrompt, text: $query)
+                                .textInputAutocapitalization(.never)
+                                .autocorrectionDisabled()
+                                .submitLabel(.search)
+                            if !query.isEmpty {
+                                Button("Clear", systemImage: "xmark.circle.fill") {
+                                    query = ""
+                                }
+                                .labelStyle(.iconOnly)
+                                .foregroundStyle(.secondary)
+                            }
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 12)
+                        .background(.white.opacity(0.86), in: Capsule())
+                    }
+
                     HStack(alignment: .top, spacing: 18) {
                         Image(systemName: headerSymbol)
                             .font(.system(size: 28, weight: .semibold))
@@ -1454,7 +1497,32 @@ struct ArticleListView: View {
             }
         }
         .navigationTitle(title)
-        .searchable(text: $query, prompt: presentation == .risks ? "Search risks" : "Search glossary")
+        .toolbar(
+            isTabRoot && horizontalSizeClass == .compact ? .hidden : .visible,
+            for: .navigationBar
+        )
+        .modifier(
+            ArticleSearchModifier(
+                query: $query,
+                prompt: searchPrompt,
+                isEnabled: !(isTabRoot && horizontalSizeClass == .compact)
+            )
+        )
+    }
+}
+
+private struct ArticleSearchModifier: ViewModifier {
+    @Binding var query: String
+    let prompt: String
+    let isEnabled: Bool
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if isEnabled {
+            content.searchable(text: $query, prompt: prompt)
+        } else {
+            content
+        }
     }
 }
 
@@ -1762,6 +1830,12 @@ struct AboutView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 28) {
+                    if horizontalSizeClass == .compact {
+                        Text("About")
+                            .font(.system(size: 34, weight: .bold, design: .rounded))
+                            .foregroundStyle(Color.ink)
+                    }
+
                     HStack(alignment: .top, spacing: 18) {
                         Image(systemName: "info.bubble.fill")
                             .font(.system(size: 28, weight: .semibold))
@@ -1835,6 +1909,7 @@ struct AboutView: View {
             }
         }
         .navigationTitle("About")
+        .toolbar(horizontalSizeClass == .compact ? .hidden : .visible, for: .navigationBar)
     }
 }
 
