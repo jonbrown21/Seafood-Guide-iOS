@@ -34,6 +34,11 @@ struct GuideRootView: View {
 
 struct ExploreView: View {
     @ObservedObject var store: GuideStore
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    private var visibleCategoryColumns: Int {
+        horizontalSizeClass == .regular ? 3 : 1
+    }
 
     var body: some View {
         ZStack {
@@ -104,11 +109,20 @@ struct ExploreView: View {
                                         CategoryCard(category: category)
                                     }
                                     .buttonStyle(.plain)
+                                    .containerRelativeFrame(
+                                        .horizontal,
+                                        count: visibleCategoryColumns,
+                                        span: 1,
+                                        spacing: 14
+                                    )
                                 }
                             }
-                            .padding(.horizontal, 20)
+                            .scrollTargetLayout()
                             .padding(.vertical, 4)
                         }
+                        .padding(.horizontal, 20)
+                        .scrollTargetBehavior(.viewAligned(limitBehavior: .always))
+                        .scrollBounceBehavior(.basedOnSize)
                     }
 
                     VStack(alignment: .leading, spacing: 14) {
@@ -170,7 +184,7 @@ struct CategoryCard: View {
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(10)
-        .frame(width: 220)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(.white, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
         .shadow(color: .black.opacity(0.08), radius: 10, y: 5)
     }
