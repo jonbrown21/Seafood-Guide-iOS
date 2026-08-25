@@ -241,27 +241,154 @@ struct SeafoodDetailView: View {
     @Environment(\.openURL) private var openURL
 
     var body: some View {
-        List {
-            Section {
-                Text(entry.name).font(.system(size: 32, weight: .bold, design: .rounded))
-                Label(entry.region, systemImage: "mappin.and.ellipse")
-                    .foregroundStyle(.secondary)
-            }
-            Section("Advice") { Text(entry.advice) }
-            Section("Description") { Text(entry.description).fixedSize(horizontal: false, vertical: true) }
-            Section("Share") {
-                ShareLink(item: shareText, subject: Text("Seafood Guide: \(entry.name)")) {
-                    Label("Share this seafood", systemImage: "square.and.arrow.up")
+        ZStack {
+            OceanBackground()
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: 26) {
+                    VStack(alignment: .leading, spacing: 20) {
+                        HStack {
+                            Image(systemName: "fish.fill")
+                                .font(.system(size: 28, weight: .semibold))
+                                .foregroundStyle(Color.ocean)
+                                .frame(width: 58, height: 58)
+                                .background(Color.seafoam, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+
+                            Spacer()
+
+                            Text("SPECIES GUIDE")
+                                .font(.caption2.weight(.bold))
+                                .tracking(1.2)
+                                .foregroundStyle(Color.ocean)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(Color.sky.opacity(0.7), in: Capsule())
+                        }
+
+                        Text(entry.name)
+                            .font(.system(size: 38, weight: .bold, design: .rounded))
+                            .foregroundStyle(Color.ink)
+
+                        HStack(spacing: 10) {
+                            Image(systemName: metadata.symbol)
+                                .foregroundStyle(Color.ocean)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(metadata.label.uppercased())
+                                    .font(.caption2.weight(.bold))
+                                    .tracking(0.8)
+                                    .foregroundStyle(.secondary)
+                                Text(metadata.value)
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(Color.ink)
+                            }
+                        }
+                    }
+                    .padding(22)
+                    .background(.white.opacity(0.88), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+                    .shadow(color: .black.opacity(0.06), radius: 16, y: 8)
+
+                    HStack(alignment: .top, spacing: 16) {
+                        Image(systemName: recommendationSymbol)
+                            .font(.title2.weight(.semibold))
+                            .foregroundStyle(recommendationColor)
+                            .frame(width: 48, height: 48)
+                            .background(.white.opacity(0.72), in: Circle())
+
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("RECOMMENDATION")
+                                .font(.caption2.weight(.bold))
+                                .tracking(1.0)
+                                .foregroundStyle(recommendationColor)
+                            Text(recommendation)
+                                .font(.title3.weight(.semibold))
+                                .foregroundStyle(Color.ink)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+
+                        Spacer(minLength: 0)
+                    }
+                    .padding(20)
+                    .background(recommendationColor.opacity(0.14), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("What to know")
+                            .font(.title2.weight(.bold))
+                            .foregroundStyle(Color.ink)
+                        Text(entry.description)
+                            .font(.body)
+                            .foregroundStyle(Color.ink.opacity(0.84))
+                            .lineSpacing(6)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+
+                    HStack(spacing: 12) {
+                        ShareLink(item: shareText, subject: Text("Seafood Guide: \(entry.name)")) {
+                            Label("Share", systemImage: "square.and.arrow.up")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.borderedProminent)
+
+                        Button {
+                            if let mailURL { openURL(mailURL) }
+                        } label: {
+                            Label("Email", systemImage: "envelope.fill")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(mailURL == nil)
+                    }
+                    .controlSize(.large)
+                    .padding(.bottom, 24)
                 }
-                Button { openURL(mailURL) } label: { Label("Email to a friend", systemImage: "envelope") }
+                .frame(maxWidth: 720)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(20)
             }
         }
-        .navigationTitle(entry.name)
+        .navigationTitle("Seafood details")
         .navigationBarTitleDisplayMode(.inline)
     }
 
+    private var metadata: (label: String, value: String, symbol: String) {
+        let components = entry.region.split(separator: ":", maxSplits: 1).map {
+            $0.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+
+        if components.count == 2 {
+            let label = components[0]
+            let symbol = label.localizedCaseInsensitiveCompare("Region") == .orderedSame
+                ? "globe.americas.fill"
+                : "tag.fill"
+            return (label, components[1], symbol)
+        }
+
+        return ("Classification", entry.region, "tag.fill")
+    }
+
+    private var recommendation: String {
+        entry.advice.replacingOccurrences(of: "Advice:", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private var recommendationColor: Color {
+        let value = recommendation.lowercased()
+        if value.contains("avoid") || value.contains("unsafe") { return .red }
+        if value.contains("not ideal") || value.contains("mercury") || value.contains("sustainable choice") || value.contains("sustanable choice") { return .orange }
+        if value.contains("safe to eat") { return .green }
+        return .orange
+    }
+
+    private var recommendationSymbol: String {
+        let value = recommendation.lowercased()
+        if value.contains("avoid") || value.contains("unsafe") { return "exclamationmark.triangle.fill" }
+        if value.contains("not ideal") || value.contains("mercury") || value.contains("sustainable choice") || value.contains("sustanable choice") { return "exclamationmark.circle.fill" }
+        if value.contains("safe to eat") { return "checkmark.seal.fill" }
+        return "exclamationmark.circle.fill"
+    }
+
     private var shareText: String { "\(entry.name)\n\n\(entry.region)\n\n\(entry.advice)\n\n\(entry.description)" }
-    private var mailURL: URL { URL(string: "mailto:?subject=Seafood%20Guide:%20\(entry.name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? entry.name)&body=\(shareText.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? shareText)")! }
+    private var mailURL: URL? {
+        URL(string: "mailto:?subject=Seafood%20Guide:%20\(entry.name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? entry.name)&body=\(shareText.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? shareText)")
+    }
 }
 
 struct ArticleListView: View {
