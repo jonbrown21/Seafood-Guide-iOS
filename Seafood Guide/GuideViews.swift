@@ -79,8 +79,6 @@ private struct CompactExploreView: View {
                                     SeafoodListView(category: category, store: store)
                                 } label: {
                                     CategoryCard(category: category)
-                                        .padding(.horizontal, 8)
-                                        .padding(.vertical, 10)
                                 }
                                 .buttonStyle(.plain)
                                 .containerRelativeFrame(.horizontal, count: 1, span: 1, spacing: 14)
@@ -359,7 +357,6 @@ struct CategoryCard: View {
         .padding(10)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.white, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .shadow(color: .black.opacity(0.08), radius: 10, y: 5)
     }
 }
 
