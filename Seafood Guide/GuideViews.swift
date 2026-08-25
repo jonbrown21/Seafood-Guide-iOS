@@ -1356,6 +1356,8 @@ struct ArticleListView: View {
     let articles: [GuideArticle]
     let presentation: ArticlePresentation
     @State private var query = ""
+    @State private var articleCardHeight: CGFloat = 0
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     init(title: String, articles: [GuideArticle], presentation: ArticlePresentation = .reference) {
         self.title = title
@@ -1423,9 +1425,18 @@ struct ArticleListView: View {
                                     relatedArticles: articles
                                 )
                             } label: {
-                                ArticleCard(article: article, presentation: presentation)
+                                ArticleCard(
+                                    article: article,
+                                    presentation: presentation,
+                                    sharedHeight: horizontalSizeClass == .regular ? articleCardHeight : 0
+                                )
                             }
                             .buttonStyle(.plain)
+                        }
+                    }
+                    .onPreferenceChange(ArticleCardHeightKey.self) { measuredHeight in
+                        if horizontalSizeClass == .regular {
+                            articleCardHeight = measuredHeight
                         }
                     }
                 }
@@ -1443,6 +1454,7 @@ struct ArticleListView: View {
 private struct ArticleCard: View {
     let article: GuideArticle
     let presentation: ArticlePresentation
+    let sharedHeight: CGFloat
 
     private var symbol: String {
         articleSymbol(for: article.title, presentation: presentation)
@@ -1478,10 +1490,26 @@ private struct ArticleCard: View {
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(17)
-        .frame(maxWidth: .infinity, minHeight: 190, alignment: .topLeading)
+        .background {
+            GeometryReader { proxy in
+                Color.clear.preference(
+                    key: ArticleCardHeightKey.self,
+                    value: proxy.size.height
+                )
+            }
+        }
+        .frame(maxWidth: .infinity, minHeight: max(190, sharedHeight), alignment: .topLeading)
         .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
         .background(.white.opacity(0.9), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
         .shadow(color: .black.opacity(0.055), radius: 9, y: 4)
+    }
+}
+
+private struct ArticleCardHeightKey: PreferenceKey {
+    static let defaultValue: CGFloat = 0
+
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = max(value, nextValue())
     }
 }
 
