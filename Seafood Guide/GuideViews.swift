@@ -1414,6 +1414,7 @@ struct ArticleListView: View {
                         }
                     }
                     .padding(20)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .background(.white.opacity(0.82), in: RoundedRectangle(cornerRadius: 26, style: .continuous))
 
                     LazyVGrid(columns: columns, alignment: .leading, spacing: 14) {
