@@ -36,136 +36,308 @@ struct ExploreView: View {
     @ObservedObject var store: GuideStore
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
-    private var visibleCategoryColumns: Int {
-        horizontalSizeClass == .regular ? 3 : 1
-    }
-
     var body: some View {
         ZStack {
             OceanBackground()
-            ScrollView {
-                VStack(alignment: .leading, spacing: 30) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("SEAFOOD GUIDE")
-                            .font(.caption.weight(.bold))
-                            .tracking(1.5)
-                            .foregroundStyle(Color.ocean)
-                        Text("Choose seafood with confidence.")
-                            .font(.system(size: 38, weight: .bold, design: .rounded))
-                            .minimumScaleFactor(0.8)
-                        Text("Compare flavor, texture, sourcing advice, and species details.")
-                            .font(.title3)
-                            .foregroundStyle(.secondary)
-                    }
-                    .padding(.horizontal, 20)
-
-                    NavigationLink {
-                        SeafoodListView(category: .all, store: store)
-                    } label: {
-                        HStack(spacing: 18) {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Browse all seafood")
-                                    .font(.title2.weight(.bold))
-                                Text("Find a species or discover something new")
-                                    .font(.subheadline)
-                                    .foregroundStyle(Color.ink.opacity(0.7))
-                                Label("Open the guide", systemImage: "arrow.right.circle.fill")
-                                    .font(.subheadline.weight(.semibold))
-                                    .foregroundStyle(Color.ocean)
-                            }
-                            Spacer(minLength: 8)
-                            CategorySymbol(category: .all)
-                                .frame(width: 82, height: 82)
-                        }
-                        .padding(22)
-                        .background(Color.seafoam, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
-                        .overlay(alignment: .topTrailing) {
-                            Image(systemName: "sparkles")
-                                .font(.title3.weight(.bold))
-                                .foregroundStyle(Color.ocean.opacity(0.7))
-                                .padding(18)
-                        }
-                    }
-                    .buttonStyle(.plain)
-                    .padding(.horizontal, 20)
-
-                    VStack(alignment: .leading, spacing: 14) {
-                        HStack {
-                            Text("Browse by category")
-                                .font(.title3.weight(.bold))
-                            Spacer()
-                            Label("Swipe", systemImage: "arrow.left.and.right")
-                                .font(.caption.weight(.medium))
-                                .foregroundStyle(.secondary)
-                        }
-                        .padding(.horizontal, 20)
-
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            LazyHStack(spacing: 14) {
-                                ForEach(SeafoodCategory.allCases.filter { $0 != .all }) { category in
-                                    NavigationLink {
-                                        SeafoodListView(category: category, store: store)
-                                    } label: {
-                                        CategoryCard(category: category)
-                                    }
-                                    .buttonStyle(.plain)
-                                    .containerRelativeFrame(
-                                        .horizontal,
-                                        count: visibleCategoryColumns,
-                                        span: 1,
-                                        spacing: 14
-                                    )
-                                }
-                            }
-                            .scrollTargetLayout()
-                            .padding(.vertical, 4)
-                        }
-                        .padding(.horizontal, 20)
-                        .scrollTargetBehavior(.viewAligned(limitBehavior: .always))
-                        .scrollBounceBehavior(.basedOnSize)
-                    }
-
-                    VStack(alignment: .leading, spacing: 14) {
-                        Text("Learn before you buy")
-                            .font(.title3.weight(.bold))
-
-                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 160), spacing: 12)], spacing: 12) {
-                            NavigationLink {
-                                ArticleListView(title: "Seafood glossary", articles: store.glossary)
-                            } label: {
-                                GuideShortcutCard(
-                                    title: "Seafood glossary",
-                                    subtitle: "Decode labels, terms, and sourcing language",
-                                    symbol: "books.vertical.fill",
-                                    color: .sky
-                                )
-                            }
-                            NavigationLink {
-                                ArticleListView(
-                                    title: "Top 10 Problems",
-                                    articles: store.aquacultureProblems,
-                                    presentation: .problems
-                                )
-                            } label: {
-                                GuideShortcutCard(
-                                    title: "Top 10 problems",
-                                    subtitle: "Understand the risks of open-ocean aquaculture",
-                                    symbol: "exclamationmark.octagon.fill",
-                                    color: .coral
-                                )
-                            }
-                        }
-                        .buttonStyle(.plain)
-                    }
-                    .padding(.horizontal, 20)
-                }
-                .frame(maxWidth: 920)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.vertical, 28)
+            if horizontalSizeClass == .regular {
+                TabletExploreView(store: store)
+            } else {
+                CompactExploreView(store: store)
             }
         }
         .navigationBarHidden(true)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+    }
+}
+
+private struct CompactExploreView: View {
+    @ObservedObject var store: GuideStore
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 30) {
+                ExploreHeading()
+                    .padding(.horizontal, 20)
+
+                BrowseAllCard(store: store, presentation: .compact)
+                    .padding(.horizontal, 20)
+
+                VStack(alignment: .leading, spacing: 14) {
+                    HStack {
+                        Text("Browse by category")
+                            .font(.title3.weight(.bold))
+                        Spacer()
+                        Label("Swipe", systemImage: "arrow.left.and.right")
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(.secondary)
+                    }
+
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        LazyHStack(spacing: 14) {
+                            ForEach(SeafoodCategory.allCases.filter { $0 != .all }) { category in
+                                NavigationLink {
+                                    SeafoodListView(category: category, store: store)
+                                } label: {
+                                    CategoryCard(category: category)
+                                }
+                                .buttonStyle(.plain)
+                                .containerRelativeFrame(.horizontal, count: 1, span: 1, spacing: 14)
+                            }
+                        }
+                        .scrollTargetLayout()
+                        .padding(.vertical, 4)
+                    }
+                    .scrollTargetBehavior(.viewAligned(limitBehavior: .always))
+                    .scrollBounceBehavior(.basedOnSize)
+                }
+                .padding(.horizontal, 20)
+
+                LearnSection(store: store)
+                    .padding(.horizontal, 20)
+            }
+            .frame(maxWidth: 920)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 28)
+        }
+    }
+}
+
+private struct TabletExploreView: View {
+    @ObservedObject var store: GuideStore
+
+    private let categoryColumns = [GridItem(.adaptive(minimum: 230, maximum: 320), spacing: 16)]
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 34) {
+                HStack(alignment: .bottom, spacing: 24) {
+                    ExploreHeading()
+                    Spacer()
+                    Label("\(store.seafood.count) sourced profiles", systemImage: "checkmark.seal.fill")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color.ocean)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 11)
+                        .background(.white.opacity(0.82), in: Capsule())
+                }
+
+                LazyVGrid(
+                    columns: [GridItem(.flexible(), spacing: 16), GridItem(.flexible())],
+                    alignment: .leading,
+                    spacing: 16
+                ) {
+                    BrowseAllCard(store: store, presentation: .wide)
+                        .gridCellAnchor(.top)
+                    GuidanceOverviewCard()
+                        .gridCellAnchor(.top)
+                }
+
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Explore the guide")
+                        .font(.title2.weight(.bold))
+
+                    LazyVGrid(columns: categoryColumns, alignment: .leading, spacing: 16) {
+                        ForEach(SeafoodCategory.allCases) { category in
+                            NavigationLink {
+                                SeafoodListView(category: category, store: store)
+                            } label: {
+                                TabletCategoryCard(
+                                    category: category,
+                                    count: store.seafood(in: category).count
+                                )
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
+
+                LearnSection(store: store, titleFont: .title2.weight(.bold), isWide: true)
+            }
+            .frame(maxWidth: 1280)
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 32)
+            .padding(.vertical, 36)
+        }
+    }
+}
+
+private struct ExploreHeading: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("SEAFOOD GUIDE")
+                .font(.caption.weight(.bold))
+                .tracking(1.5)
+                .foregroundStyle(Color.ocean)
+            Text("Choose seafood with confidence.")
+                .font(.system(size: 38, weight: .bold, design: .rounded))
+                .minimumScaleFactor(0.8)
+            Text("Compare flavor, texture, sourcing advice, and species details.")
+                .font(.title3)
+                .foregroundStyle(.secondary)
+        }
+    }
+}
+
+private enum BrowseAllPresentation {
+    case compact, wide
+}
+
+private struct BrowseAllCard: View {
+    @ObservedObject var store: GuideStore
+    let presentation: BrowseAllPresentation
+
+    var body: some View {
+        NavigationLink {
+            SeafoodListView(category: .all, store: store)
+        } label: {
+            HStack(spacing: 18) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Browse all seafood")
+                        .font(presentation == .wide ? .title.weight(.bold) : .title2.weight(.bold))
+                    Text("Find a species or discover something new")
+                        .font(presentation == .wide ? .body : .subheadline)
+                        .foregroundStyle(Color.ink.opacity(0.7))
+                    Label("Open \(store.seafood.count) profiles", systemImage: "arrow.right.circle.fill")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color.ocean)
+                }
+                Spacer(minLength: 8)
+                CategorySymbol(category: .all)
+                    .frame(width: presentation == .wide ? 104 : 82, height: presentation == .wide ? 104 : 82)
+            }
+            .padding(presentation == .wide ? 28 : 22)
+            .background(Color.seafoam, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+            .overlay(alignment: .topTrailing) {
+                Image(systemName: "sparkles")
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(Color.ocean.opacity(0.7))
+                    .padding(18)
+            }
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+private struct GuidanceOverviewCard: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            HStack {
+                Text("Read the guidance")
+                    .font(.title2.weight(.bold))
+                Spacer()
+                Image(systemName: "checkmark.seal.fill")
+                    .font(.title2)
+                    .foregroundStyle(Color.ocean)
+            }
+
+            Text("Health guidance and sourcing details answer different questions. Every profile keeps them separate and links to its sources.")
+                .font(.body)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            HStack(spacing: 10) {
+                GuidanceChip(title: "Best choice", symbol: "checkmark", color: .seafoam)
+                GuidanceChip(title: "Good choice", symbol: "minus", color: .sunshine)
+                GuidanceChip(title: "Avoid", symbol: "exclamationmark", color: .coral)
+            }
+        }
+        .padding(28)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.white, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .shadow(color: .black.opacity(0.06), radius: 12, y: 6)
+    }
+}
+
+private struct GuidanceChip: View {
+    let title: String
+    let symbol: String
+    let color: Color
+
+    var body: some View {
+        Label(title, systemImage: symbol)
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(Color.ink)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 9)
+            .background(color, in: Capsule())
+    }
+}
+
+private struct TabletCategoryCard: View {
+    let category: SeafoodCategory
+    let count: Int
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(alignment: .top) {
+                CategorySymbol(category: category)
+                    .frame(width: 62, height: 62)
+                Spacer()
+                Text("\(count)")
+                    .font(.title2.weight(.bold))
+                    .foregroundStyle(Color.ocean)
+                    .contentTransition(.numericText())
+            }
+            Text(category.title)
+                .font(.title3.weight(.bold))
+                .foregroundStyle(Color.ink)
+            Text(category.subtitle)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.white, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .shadow(color: .black.opacity(0.06), radius: 10, y: 5)
+    }
+}
+
+private struct LearnSection: View {
+    @ObservedObject var store: GuideStore
+    var titleFont: Font = .title3.weight(.bold)
+    var isWide = false
+
+    private var columns: [GridItem] {
+        if isWide {
+            return [GridItem(.flexible(), spacing: 12), GridItem(.flexible())]
+        }
+        return [GridItem(.adaptive(minimum: 160), spacing: 12)]
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Learn before you buy")
+                .font(titleFont)
+
+            LazyVGrid(columns: columns, spacing: 12) {
+                NavigationLink {
+                    ArticleListView(title: "Seafood glossary", articles: store.glossary)
+                } label: {
+                    GuideShortcutCard(
+                        title: "Seafood glossary",
+                        subtitle: "Decode labels, terms, and sourcing language",
+                        symbol: "books.vertical.fill",
+                        color: .sky
+                    )
+                }
+                NavigationLink {
+                    ArticleListView(
+                        title: "Top 10 Problems",
+                        articles: store.aquacultureProblems,
+                        presentation: .problems
+                    )
+                } label: {
+                    GuideShortcutCard(
+                        title: "Top 10 problems",
+                        subtitle: "Understand the risks of open-ocean aquaculture",
+                        symbol: "exclamationmark.octagon.fill",
+                        color: .coral
+                    )
+                }
+            }
+            .buttonStyle(.plain)
+        }
     }
 }
 
