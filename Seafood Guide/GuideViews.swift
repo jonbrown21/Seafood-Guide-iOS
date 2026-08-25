@@ -1248,7 +1248,13 @@ struct ArticleListView: View {
 
                     LazyVGrid(columns: columns, alignment: .leading, spacing: 14) {
                         ForEach(filtered) { article in
-                            NavigationLink { ArticleDetailView(article: article, presentation: presentation) } label: {
+                            NavigationLink {
+                                ArticleDetailView(
+                                    article: article,
+                                    presentation: presentation,
+                                    relatedArticles: articles
+                                )
+                            } label: {
                                 ArticleCard(article: article, presentation: presentation)
                             }
                             .buttonStyle(.plain)
@@ -1334,33 +1340,178 @@ private func articleSymbol(for title: String, presentation: ArticlePresentation)
 struct ArticleDetailView: View {
     let article: GuideArticle
     let presentation: ArticlePresentation
+    let relatedArticles: [GuideArticle]
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
-    init(article: GuideArticle, presentation: ArticlePresentation = .reference) {
+    init(
+        article: GuideArticle,
+        presentation: ArticlePresentation = .reference,
+        relatedArticles: [GuideArticle] = []
+    ) {
         self.article = article
         self.presentation = presentation
+        self.relatedArticles = relatedArticles
+    }
+
+    private var related: [GuideArticle] {
+        let currentNumber = article.number ?? 0
+        return Array(
+            relatedArticles
+                .filter { $0.id != article.id }
+                .sorted {
+                    abs(($0.number ?? 0) - currentNumber) < abs(($1.number ?? 0) - currentNumber)
+                }
+                .prefix(5)
+        )
     }
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
-                Image(systemName: articleSymbol(for: article.title, presentation: presentation))
-                    .font(.system(size: 42, weight: .semibold))
-                    .foregroundStyle(Color.ocean)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 150)
-                    .background(
-                        presentation == .risks ? Color.coral.opacity(0.6) : Color.seafoam,
-                        in: RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    )
-                Text(article.title).font(.system(size: 32, weight: .bold, design: .rounded))
-                Text(article.body).font(.body).lineSpacing(5)
-                SourceLinksView(sources: article.sources)
+            if horizontalSizeClass == .regular {
+                tabletContent
+            } else {
+                compactContent
             }
-            .padding()
         }
         .background(OceanBackground())
         .navigationTitle(article.title)
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var compactContent: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            articleHero
+            Text(article.title).font(.system(size: 32, weight: .bold, design: .rounded))
+            Text(article.body).font(.body).lineSpacing(5)
+            SourceLinksView(sources: article.sources)
+        }
+        .padding()
+    }
+
+    private var tabletContent: some View {
+        VStack(alignment: .leading, spacing: 24) {
+            HStack(spacing: 20) {
+                Image(systemName: articleSymbol(for: article.title, presentation: presentation))
+                    .font(.system(size: 34, weight: .semibold))
+                    .foregroundStyle(Color.ocean)
+                    .frame(width: 82, height: 82)
+                    .background(articleColor, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+
+                VStack(alignment: .leading, spacing: 7) {
+                    Text(presentation == .risks ? "SEAFOOD RISK" : "GUIDE REFERENCE")
+                        .font(.caption.weight(.bold))
+                        .tracking(1.2)
+                        .foregroundStyle(Color.ocean)
+                    Text(article.title)
+                        .font(.system(size: 34, weight: .bold, design: .rounded))
+                        .foregroundStyle(Color.ink)
+                }
+
+                Spacer(minLength: 0)
+            }
+            .padding(22)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(articleColor.opacity(0.72), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+
+            HStack(alignment: .top, spacing: 24) {
+                VStack(alignment: .leading, spacing: 22) {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Label("What to know", systemImage: "lightbulb.max.fill")
+                            .font(.title3.weight(.bold))
+                            .foregroundStyle(Color.ink)
+                        Text(article.body)
+                            .font(.title3)
+                            .foregroundStyle(Color.ink.opacity(0.78))
+                            .lineSpacing(7)
+                    }
+                    .padding(24)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(.white.opacity(0.86), in: RoundedRectangle(cornerRadius: 26, style: .continuous))
+
+                    SourceLinksView(sources: article.sources)
+                }
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+
+                if !related.isEmpty {
+                    RelatedArticlesView(
+                        articles: related,
+                        allArticles: relatedArticles,
+                        presentation: presentation
+                    )
+                    .frame(width: 340, alignment: .topLeading)
+                }
+            }
+        }
+        .frame(maxWidth: 1180)
+        .frame(maxWidth: .infinity, alignment: .top)
+        .padding(.horizontal, 28)
+        .padding(.vertical, 24)
+    }
+
+    private var articleHero: some View {
+        Image(systemName: articleSymbol(for: article.title, presentation: presentation))
+            .font(.system(size: 42, weight: .semibold))
+            .foregroundStyle(Color.ocean)
+            .frame(maxWidth: .infinity)
+            .frame(height: 150)
+            .background(articleColor, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+    }
+
+    private var articleColor: Color {
+        presentation == .risks ? Color.coral.opacity(0.6) : Color.seafoam
+    }
+}
+
+private struct RelatedArticlesView: View {
+    let articles: [GuideArticle]
+    let allArticles: [GuideArticle]
+    let presentation: ArticlePresentation
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Related topics")
+                .font(.title2.weight(.bold))
+                .foregroundStyle(Color.ink)
+
+            Text("Continue through the guide without returning to the full list.")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+
+            ForEach(articles) { relatedArticle in
+                NavigationLink {
+                    ArticleDetailView(
+                        article: relatedArticle,
+                        presentation: presentation,
+                        relatedArticles: allArticles
+                    )
+                } label: {
+                    HStack(spacing: 13) {
+                        Image(systemName: articleSymbol(for: relatedArticle.title, presentation: presentation))
+                            .font(.body.weight(.semibold))
+                            .foregroundStyle(Color.ocean)
+                            .frame(width: 42, height: 42)
+                            .background(
+                                presentation == .risks ? Color.coral.opacity(0.55) : Color.seafoam,
+                                in: RoundedRectangle(cornerRadius: 13, style: .continuous)
+                            )
+
+                        Text(relatedArticle.title)
+                            .font(.body.weight(.semibold))
+                            .foregroundStyle(Color.ink)
+                            .multilineTextAlignment(.leading)
+                            .fixedSize(horizontal: false, vertical: true)
+
+                        Spacer(minLength: 8)
+                        CardChevron()
+                    }
+                    .padding(13)
+                    .background(.white.opacity(0.88), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(20)
+        .background(.white.opacity(0.5), in: RoundedRectangle(cornerRadius: 26, style: .continuous))
     }
 }
 
@@ -1437,7 +1588,9 @@ struct AboutView: View {
 
                             LazyVGrid(columns: columns, alignment: .leading, spacing: 14) {
                                 ForEach(section.articles) { article in
-                                    NavigationLink { ArticleDetailView(article: article) } label: {
+                                    NavigationLink {
+                                        ArticleDetailView(article: article, relatedArticles: section.articles)
+                                    } label: {
                                         AboutArticleCard(article: article, colorIndex: sectionIndex)
                                     }
                                     .buttonStyle(.plain)
