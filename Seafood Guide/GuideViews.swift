@@ -3,6 +3,12 @@ import CoreTransferable
 import EventKit
 import UniformTypeIdentifiers
 
+private extension View {
+    func fullWidthBanner() -> some View {
+        frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
 struct GuideRootView: View {
     @ObservedObject var store: GuideStore
 
@@ -527,7 +533,7 @@ private struct TabletSeafoodListHeader: View {
                 .background(.white.opacity(0.8), in: Capsule())
         }
         .padding(22)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .fullWidthBanner()
         .background(category.tintColor.opacity(0.78), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
     }
 }
@@ -1414,7 +1420,7 @@ struct ArticleListView: View {
                         }
                     }
                     .padding(20)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .fullWidthBanner()
                     .background(.white.opacity(0.82), in: RoundedRectangle(cornerRadius: 26, style: .continuous))
 
                     LazyVGrid(columns: columns, alignment: .leading, spacing: 14) {
@@ -1607,7 +1613,7 @@ struct ArticleDetailView: View {
                 Spacer(minLength: 0)
             }
             .padding(22)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .fullWidthBanner()
             .background(articleColor.opacity(0.72), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
 
             VStack(alignment: .leading, spacing: 22) {
@@ -1778,7 +1784,7 @@ struct AboutView: View {
                         }
                     }
                     .padding(20)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .fullWidthBanner()
                     .background(.white.opacity(0.84), in: RoundedRectangle(cornerRadius: 26, style: .continuous))
 
                     ForEach(Array(sections.enumerated()), id: \.element.id) { sectionIndex, section in
