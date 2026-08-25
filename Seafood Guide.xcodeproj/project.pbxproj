@@ -192,7 +192,7 @@
 				INFOPLIST_FILE = "Seafood Guide/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Seafood Guide";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.reference";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 8.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jonbrown.org.Seafood-Guide";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -212,7 +212,7 @@
 				INFOPLIST_FILE = "Seafood Guide/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Seafood Guide";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.reference";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 8.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jonbrown.org.Seafood-Guide";
 				PRODUCT_NAME = "$(TARGET_NAME)";
