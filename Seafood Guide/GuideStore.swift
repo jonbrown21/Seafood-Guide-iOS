@@ -37,7 +37,6 @@ private final class ResourceXMLParser: NSObject, XMLParserDelegate {
     private var articles: [GuideArticle] = []
     private var currentTitle = ""
     private var currentBody = ""
-    private var currentImage = ""
     private var currentNumber: Int?
     private var currentElement = ""
     private var insideArticle = false
@@ -57,7 +56,6 @@ private final class ResourceXMLParser: NSObject, XMLParserDelegate {
             insideArticle = true
             currentTitle = ""
             currentBody = ""
-            currentImage = ""
             currentNumber = nil
         }
     }
@@ -67,7 +65,6 @@ private final class ResourceXMLParser: NSObject, XMLParserDelegate {
         switch currentElement {
         case "titlenews": currentTitle += string
         case "descnews": currentBody += string
-        case "imageurl": currentImage += string
         case "linknews":
             let value = string.trimmingCharacters(in: .whitespacesAndNewlines)
             currentNumber = Int(value)
@@ -77,7 +74,7 @@ private final class ResourceXMLParser: NSObject, XMLParserDelegate {
 
     func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
         if elementName == "new" {
-            articles.append(GuideArticle(title: currentTitle.cleaned, body: currentBody.cleaned, imageName: currentImage.cleaned.isEmpty ? nil : URL(fileURLWithPath: currentImage.cleaned).deletingPathExtension().lastPathComponent, number: currentNumber))
+            articles.append(GuideArticle(title: currentTitle.cleaned, body: currentBody.cleaned, number: currentNumber))
             insideArticle = false
         }
         currentElement = ""

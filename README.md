@@ -8,7 +8,8 @@ This branch is the SwiftUI rewrite of Seafood Guide. It preserves the existing b
 - Glossary, Top 10 educational content, and the three-section guide information area.
 - Share and email actions from seafood details.
 - Native SwiftUI loading experience with SF Symbols instead of launch-image screens or image-based UI icons.
-- Editorial photos and educational XML content reused only as content resources.
+- No photo assets or legacy graphic elements are used; visual language is built with SwiftUI shapes, gradients, and SF Symbols.
+- Educational XML content remains as text-only app resources.
 - iOS 16.0 or later, with iPhone and iPad support.
 
 Open `Seafood Guide.xcodeproj` in Xcode and build the `Seafood Guide` scheme. The bundle identifier remains `com.jonbrown.org.Seafood-Guide`.

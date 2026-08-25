@@ -14,7 +14,6 @@ struct GuideArticle: Identifiable, Hashable {
     let id = UUID()
     let title: String
     let body: String
-    let imageName: String?
     let number: Int?
 }
 

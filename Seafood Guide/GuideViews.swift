@@ -149,7 +149,11 @@ struct ArticleListView: View {
         List(filtered) { article in
             NavigationLink { ArticleDetailView(article: article) } label: {
                 HStack(spacing: 14) {
-                    if let imageName = article.imageName { Image(imageName).resizable().scaledToFill().frame(width: 58, height: 58).clipShape(RoundedRectangle(cornerRadius: 12)) }
+                    Image(systemName: article.number == nil ? "book.pages.fill" : "number.circle.fill")
+                        .font(.title2)
+                        .foregroundStyle(Color.ocean)
+                        .frame(width: 42, height: 42)
+                        .background(Color.seafoam, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                     VStack(alignment: .leading, spacing: 4) {
                         if let number = article.number { Text("\(number)").font(.caption.weight(.bold)).foregroundStyle(.teal) }
                         Text(article.title).font(.headline)
@@ -169,7 +173,12 @@ struct ArticleDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                if let imageName = article.imageName { Image(imageName).resizable().scaledToFill().frame(maxWidth: .infinity).frame(height: 210).clipped().clipShape(RoundedRectangle(cornerRadius: 20)) }
+                Image(systemName: article.number == nil ? "book.pages.fill" : "text.book.closed.fill")
+                    .font(.system(size: 42, weight: .semibold))
+                    .foregroundStyle(Color.ocean)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 150)
+                    .background(Color.seafoam, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
                 Text(article.title).font(.system(size: 32, weight: .bold, design: .rounded))
                 Text(article.body).font(.body).lineSpacing(5)
             }
