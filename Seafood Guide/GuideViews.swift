@@ -1,5 +1,6 @@
 import SwiftUI
 import CoreTransferable
+import EventKit
 import UniformTypeIdentifiers
 
 struct GuideRootView: View {
@@ -524,6 +525,13 @@ private struct SeafoodGuidanceBadge: View {
 struct SeafoodDetailView: View {
     let entry: SeafoodEntry
     @State private var shareImage: SeafoodShareImage?
+    @StateObject private var reminderStore = SeafoodReminderStore()
+    @AppStorage("shoppingListIdentifier") private var shoppingListIdentifier = ""
+    @State private var showingListPicker = false
+    @State private var showingRemindersPermissionAlert = false
+    @State private var reminderErrorMessage: String?
+    @State private var addToListState: AddToListState = .idle
+    @Environment(\.openURL) private var openURL
 
     var body: some View {
         ZStack {
@@ -608,24 +616,37 @@ struct SeafoodDetailView: View {
 
                     SourceLinksView(sources: entry.sources)
 
-                    Group {
-                        if let shareImage {
-                            ShareLink(
-                                item: shareImage,
-                                subject: Text("Seafood Guide: \(entry.name)"),
-                                message: Text("Explore \(entry.name) with Seafood Guide."),
-                                preview: SharePreview(
-                                    "\(entry.name) • Seafood Guide",
-                                    image: Image(systemName: "fish.fill")
-                                )
-                            ) {
-                                Label("Share this guide", systemImage: "square.and.arrow.up")
-                                    .frame(maxWidth: .infinity)
-                            }
-                        } else {
-                            Label("Preparing share image", systemImage: "photo.badge.arrow.down")
+                    HStack(spacing: 12) {
+                        Button(action: addToShoppingList) {
+                            Label(addToListState.title, systemImage: addToListState.symbol)
                                 .frame(maxWidth: .infinity)
-                                .foregroundStyle(.secondary)
+                        }
+                        .disabled(addToListState != .idle)
+                        .contextMenu {
+                            Button("Choose Different List", systemImage: "list.bullet") {
+                                chooseShoppingList()
+                            }
+                        }
+
+                        Group {
+                            if let shareImage {
+                                ShareLink(
+                                    item: shareImage,
+                                    subject: Text("Seafood Guide: \(entry.name)"),
+                                    message: Text("Explore \(entry.name) with Seafood Guide."),
+                                    preview: SharePreview(
+                                        "\(entry.name) • Seafood Guide",
+                                        image: Image(systemName: "fish.fill")
+                                    )
+                                ) {
+                                    Label("Share", systemImage: "square.and.arrow.up")
+                                        .frame(maxWidth: .infinity)
+                                }
+                            } else {
+                                Label("Preparing", systemImage: "photo.badge.arrow.down")
+                                    .frame(maxWidth: .infinity)
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                     }
                     .buttonStyle(.borderedProminent)
@@ -639,6 +660,30 @@ struct SeafoodDetailView: View {
         }
         .navigationTitle("Seafood details")
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showingListPicker) {
+            ReminderListPicker(lists: reminderStore.lists) { list in
+                shoppingListIdentifier = list.calendarIdentifier
+                showingListPicker = false
+                add(entry, to: list)
+            }
+            .presentationDetents([.medium, .large])
+        }
+        .alert("Reminders Access Needed", isPresented: $showingRemindersPermissionAlert) {
+            Button("Not Now", role: .cancel) {}
+            Button("Open Settings") {
+                if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
+                    openURL(settingsURL)
+                }
+            }
+        } message: {
+            Text("Allow Reminders access in Settings to add seafood to a shopping list.")
+        }
+        .alert("Couldn’t Add to List", isPresented: reminderErrorBinding) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(reminderErrorMessage ?? "Please try again.")
+        }
+        .sensoryFeedback(.success, trigger: addToListState == .added)
         .task {
             if shareImage == nil {
                 shareImage = renderShareImage()
@@ -688,6 +733,55 @@ struct SeafoodDetailView: View {
         return "exclamationmark.circle.fill"
     }
 
+    private var reminderErrorBinding: Binding<Bool> {
+        Binding(
+            get: { reminderErrorMessage != nil },
+            set: { if !$0 { reminderErrorMessage = nil } }
+        )
+    }
+
+    private func addToShoppingList() {
+        addToListState = .working
+        Task {
+            guard await reminderStore.requestAccess() else {
+                addToListState = .idle
+                showingRemindersPermissionAlert = true
+                return
+            }
+
+            if let list = reminderStore.list(withIdentifier: shoppingListIdentifier) {
+                add(entry, to: list)
+            } else {
+                addToListState = .idle
+                showingListPicker = true
+            }
+        }
+    }
+
+    private func chooseShoppingList() {
+        Task {
+            guard await reminderStore.requestAccess() else {
+                showingRemindersPermissionAlert = true
+                return
+            }
+            showingListPicker = true
+        }
+    }
+
+    private func add(_ entry: SeafoodEntry, to list: EKCalendar) {
+        do {
+            try reminderStore.add(entry, recommendation: recommendation, to: list)
+            addToListState = .added
+            Task {
+                try? await Task.sleep(for: .seconds(1.5))
+                addToListState = .idle
+            }
+        } catch {
+            addToListState = .idle
+            reminderErrorMessage = error.localizedDescription
+        }
+    }
+
     private func renderShareImage() -> SeafoodShareImage? {
         let card = SeafoodShareCard(
             name: entry.name,
@@ -707,6 +801,120 @@ struct SeafoodDetailView: View {
             .filter { !$0.isEmpty }
             .joined(separator: "-")
         return SeafoodShareImage(data: data, filename: "Seafood-Guide-\(safeName).png")
+    }
+}
+
+private enum AddToListState {
+    case idle, working, added
+
+    var title: String {
+        switch self {
+        case .idle: "Add to List"
+        case .working: "Adding"
+        case .added: "Added"
+        }
+    }
+
+    var symbol: String {
+        switch self {
+        case .idle: "cart.badge.plus"
+        case .working: "ellipsis"
+        case .added: "checkmark"
+        }
+    }
+}
+
+@MainActor
+private final class SeafoodReminderStore: ObservableObject {
+    private let eventStore = EKEventStore()
+    @Published private(set) var lists: [EKCalendar] = []
+
+    func requestAccess() async -> Bool {
+        let granted = await withCheckedContinuation { continuation in
+            eventStore.requestFullAccessToReminders { granted, _ in
+                continuation.resume(returning: granted)
+            }
+        }
+
+        if granted {
+            lists = eventStore.calendars(for: .reminder)
+                .filter(\.allowsContentModifications)
+                .sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
+        }
+        return granted
+    }
+
+    func list(withIdentifier identifier: String) -> EKCalendar? {
+        lists.first { $0.calendarIdentifier == identifier }
+    }
+
+    func add(_ entry: SeafoodEntry, recommendation: String, to list: EKCalendar) throws {
+        let reminder = EKReminder(eventStore: eventStore)
+        reminder.calendar = list
+        reminder.title = entry.name
+
+        var noteLines = [
+            "Added from Seafood Guide",
+            recommendation,
+            entry.region
+        ].filter { !$0.isEmpty }
+
+        if let source = entry.sources.first {
+            noteLines.append("Source: \(source.title)")
+            noteLines.append(source.url.absoluteString)
+        }
+
+        reminder.notes = noteLines.joined(separator: "\n")
+        try eventStore.save(reminder, commit: true)
+    }
+}
+
+private struct ReminderListPicker: View {
+    let lists: [EKCalendar]
+    let selection: (EKCalendar) -> Void
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if lists.isEmpty {
+                    ContentUnavailableView(
+                        "No Editable Lists",
+                        systemImage: "list.bullet.clipboard",
+                        description: Text("Create a list in Reminders, then try again.")
+                    )
+                } else {
+                    List(lists, id: \.calendarIdentifier) { list in
+                        Button {
+                            selection(list)
+                        } label: {
+                            HStack(spacing: 14) {
+                                Image(systemName: "list.bullet")
+                                    .font(.headline)
+                                    .foregroundStyle(Color.ocean)
+                                    .frame(width: 42, height: 42)
+                                    .background(Color.seafoam, in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+                                Text(list.title)
+                                    .font(.headline)
+                                    .foregroundStyle(Color.ink)
+                                Spacer()
+                                Image(systemName: "plus.circle.fill")
+                                    .foregroundStyle(Color.ocean)
+                            }
+                            .contentShape(Rectangle())
+                        }
+                    }
+                    .listStyle(.plain)
+                }
+            }
+            .navigationTitle("Choose a List")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+            }
+        }
     }
 }
 

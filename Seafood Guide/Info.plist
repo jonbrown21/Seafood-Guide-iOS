@@ -22,6 +22,8 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSRemindersFullAccessUsageDescription</key>
+	<string>Seafood Guide adds seafood you choose to your selected shopping list.</string>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>
