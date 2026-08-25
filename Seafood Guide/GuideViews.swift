@@ -414,10 +414,13 @@ struct SeafoodListView: View {
     @State private var query = ""
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
+    private var categoryEntries: [SeafoodEntry] {
+        store.seafood(in: category)
+    }
+
     private var filtered: [SeafoodEntry] {
-        let entries = store.seafood(in: category)
-        guard !query.isEmpty else { return entries }
-        return entries.filter {
+        guard !query.isEmpty else { return categoryEntries }
+        return categoryEntries.filter {
             $0.name.localizedCaseInsensitiveContains(query)
                 || $0.description.localizedCaseInsensitiveContains(query)
                 || $0.region.localizedCaseInsensitiveContains(query)
@@ -438,7 +441,9 @@ struct SeafoodListView: View {
 
                         LazyVGrid(columns: tabletColumns, alignment: .leading, spacing: 18) {
                             ForEach(filtered) { fish in
-                                NavigationLink { SeafoodDetailView(entry: fish) } label: {
+                                NavigationLink {
+                                    SeafoodDetailView(entry: fish, relatedEntries: categoryEntries)
+                                } label: {
                                     TabletSeafoodListCard(entry: fish)
                                 }
                                 .buttonStyle(.plain)
@@ -452,7 +457,9 @@ struct SeafoodListView: View {
                 } else {
                     LazyVGrid(columns: compactColumns, alignment: .leading, spacing: 14) {
                         ForEach(filtered) { fish in
-                            NavigationLink { SeafoodDetailView(entry: fish) } label: {
+                            NavigationLink {
+                                SeafoodDetailView(entry: fish, relatedEntries: categoryEntries)
+                            } label: {
                                 SeafoodListRow(entry: fish)
                             }
                             .buttonStyle(.plain)
@@ -629,6 +636,7 @@ private struct SeafoodGuidanceBadge: View {
 
 struct SeafoodDetailView: View {
     let entry: SeafoodEntry
+    let relatedEntries: [SeafoodEntry]
     @State private var shareImage: SeafoodShareImage?
     @StateObject private var reminderStore = SeafoodReminderStore()
     @AppStorage("shoppingListIdentifier") private var shoppingListIdentifier = ""
@@ -637,130 +645,31 @@ struct SeafoodDetailView: View {
     @State private var reminderErrorMessage: String?
     @State private var addToListState: AddToListState = .idle
     @Environment(\.openURL) private var openURL
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    init(entry: SeafoodEntry, relatedEntries: [SeafoodEntry] = []) {
+        self.entry = entry
+        self.relatedEntries = relatedEntries
+    }
+
+    private var category: SeafoodCategory {
+        SeafoodCategory(rawValue: entry.categoryIndex) ?? .other
+    }
+
+    private var related: [SeafoodEntry] {
+        Array(relatedEntries.filter { $0.id != entry.id }.prefix(4))
+    }
 
     var body: some View {
         ZStack {
             OceanBackground()
 
             ScrollView {
-                VStack(alignment: .leading, spacing: 26) {
-                    VStack(alignment: .leading, spacing: 20) {
-                        HStack {
-                            Image(systemName: "fish.fill")
-                                .font(.system(size: 28, weight: .semibold))
-                                .foregroundStyle(Color.ocean)
-                                .frame(width: 58, height: 58)
-                                .background(Color.seafoam, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-
-                            Spacer()
-
-                            Text("SPECIES GUIDE")
-                                .font(.caption2.weight(.bold))
-                                .tracking(1.2)
-                                .foregroundStyle(Color.ocean)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 8)
-                                .background(Color.sky.opacity(0.7), in: Capsule())
-                        }
-
-                        Text(entry.name)
-                            .font(.system(size: 38, weight: .bold, design: .rounded))
-                            .foregroundStyle(Color.ink)
-
-                        HStack(spacing: 10) {
-                            Image(systemName: metadata.symbol)
-                                .foregroundStyle(Color.ocean)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(metadata.label.uppercased())
-                                    .font(.caption2.weight(.bold))
-                                    .tracking(0.8)
-                                    .foregroundStyle(.secondary)
-                                Text(metadata.value)
-                                    .font(.subheadline.weight(.semibold))
-                                    .foregroundStyle(Color.ink)
-                            }
-                        }
-                    }
-                    .padding(22)
-                    .background(.white.opacity(0.88), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
-                    .shadow(color: .black.opacity(0.06), radius: 16, y: 8)
-
-                    HStack(alignment: .top, spacing: 16) {
-                        Image(systemName: recommendationSymbol)
-                            .font(.title2.weight(.semibold))
-                            .foregroundStyle(recommendationColor)
-                            .frame(width: 48, height: 48)
-                            .background(.white.opacity(0.72), in: Circle())
-
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("RECOMMENDATION")
-                                .font(.caption2.weight(.bold))
-                                .tracking(1.0)
-                                .foregroundStyle(recommendationColor)
-                            Text(recommendation)
-                                .font(.title3.weight(.semibold))
-                                .foregroundStyle(Color.ink)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-
-                        Spacer(minLength: 0)
-                    }
-                    .padding(20)
-                    .background(recommendationColor.opacity(0.14), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("What to know")
-                            .font(.title2.weight(.bold))
-                            .foregroundStyle(Color.ink)
-                        Text(entry.description)
-                            .font(.body)
-                            .foregroundStyle(Color.ink.opacity(0.84))
-                            .lineSpacing(6)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-
-                    SourceLinksView(sources: entry.sources)
-
-                    HStack(spacing: 12) {
-                        Button(action: addToShoppingList) {
-                            Label(addToListState.title, systemImage: addToListState.symbol)
-                                .frame(maxWidth: .infinity)
-                        }
-                        .disabled(addToListState != .idle)
-                        .contextMenu {
-                            Button("Choose Different List", systemImage: "list.bullet") {
-                                chooseShoppingList()
-                            }
-                        }
-
-                        Group {
-                            if let shareImage {
-                                ShareLink(
-                                    item: shareImage,
-                                    subject: Text("Seafood Guide: \(entry.name)"),
-                                    message: Text("Explore \(entry.name) with Seafood Guide."),
-                                    preview: SharePreview(
-                                        "\(entry.name) • Seafood Guide",
-                                        image: shareImage.previewImage
-                                    )
-                                ) {
-                                    Label("Share", systemImage: "square.and.arrow.up")
-                                        .frame(maxWidth: .infinity)
-                                }
-                            } else {
-                                Label("Preparing", systemImage: "photo.badge.arrow.down")
-                                    .frame(maxWidth: .infinity)
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-                    .padding(.bottom, 24)
+                if horizontalSizeClass == .regular {
+                    tabletContent
+                } else {
+                    compactContent
                 }
-                .frame(maxWidth: 720)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(20)
             }
         }
         .navigationTitle("Seafood details")
@@ -794,6 +703,210 @@ struct SeafoodDetailView: View {
                 shareImage = renderShareImage()
             }
         }
+    }
+
+    private var compactContent: some View {
+        VStack(alignment: .leading, spacing: 26) {
+            speciesIdentityCard
+            recommendationCard
+            whatToKnowCard
+            SourceLinksView(sources: entry.sources)
+            actionButtons
+                .padding(.bottom, 24)
+        }
+        .frame(maxWidth: 720)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(20)
+    }
+
+    private var tabletContent: some View {
+        VStack(alignment: .leading, spacing: 24) {
+            HStack(alignment: .top, spacing: 24) {
+                VStack(alignment: .leading, spacing: 20) {
+                    speciesIdentityCard
+                    recommendationCard
+                }
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+
+                VStack(alignment: .leading, spacing: 20) {
+                    whatToKnowCard
+                    SourceLinksView(sources: entry.sources)
+                    actionButtons
+                }
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+            }
+
+            if !related.isEmpty {
+                VStack(alignment: .leading, spacing: 14) {
+                    HStack(alignment: .firstTextBaseline) {
+                        Text("More \(category.title.lowercased())")
+                            .font(.title2.weight(.bold))
+                            .foregroundStyle(Color.ink)
+                        Spacer()
+                        Text("Continue exploring")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    LazyVGrid(
+                        columns: [GridItem(.adaptive(minimum: 240), spacing: 14)],
+                        alignment: .leading,
+                        spacing: 14
+                    ) {
+                        ForEach(related) { relatedEntry in
+                            NavigationLink {
+                                SeafoodDetailView(entry: relatedEntry, relatedEntries: relatedEntries)
+                            } label: {
+                                RelatedSeafoodCard(entry: relatedEntry)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
+            }
+        }
+        .frame(maxWidth: 1180)
+        .frame(maxWidth: .infinity, alignment: .top)
+        .padding(.horizontal, 28)
+        .padding(.vertical, 24)
+    }
+
+    private var speciesIdentityCard: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            HStack {
+                Image(systemName: horizontalSizeClass == .regular ? category.symbolName : "fish.fill")
+                    .font(.system(size: 28, weight: .semibold))
+                    .foregroundStyle(Color.ocean)
+                    .frame(width: 58, height: 58)
+                    .background(
+                        horizontalSizeClass == .regular ? category.tintColor : Color.seafoam,
+                        in: RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    )
+
+                Spacer()
+
+                Text("SPECIES GUIDE")
+                    .font(.caption2.weight(.bold))
+                    .tracking(1.2)
+                    .foregroundStyle(Color.ocean)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(Color.sky.opacity(0.7), in: Capsule())
+            }
+
+            Text(entry.name)
+                .font(.system(size: 38, weight: .bold, design: .rounded))
+                .foregroundStyle(Color.ink)
+
+            HStack(spacing: 10) {
+                Image(systemName: metadata.symbol)
+                    .foregroundStyle(Color.ocean)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(metadata.label.uppercased())
+                        .font(.caption2.weight(.bold))
+                        .tracking(0.8)
+                        .foregroundStyle(.secondary)
+                    Text(metadata.value)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color.ink)
+                }
+            }
+        }
+        .padding(22)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.white.opacity(0.88), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .shadow(color: .black.opacity(0.06), radius: 16, y: 8)
+    }
+
+    private var recommendationCard: some View {
+        HStack(alignment: .top, spacing: 16) {
+            Image(systemName: recommendationSymbol)
+                .font(.title2.weight(.semibold))
+                .foregroundStyle(recommendationColor)
+                .frame(width: 48, height: 48)
+                .background(.white.opacity(0.72), in: Circle())
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("RECOMMENDATION")
+                    .font(.caption2.weight(.bold))
+                    .tracking(1.0)
+                    .foregroundStyle(recommendationColor)
+                Text(recommendation)
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(Color.ink)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Spacer(minLength: 0)
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(recommendationColor.opacity(0.14), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+    }
+
+    private var whatToKnowCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if horizontalSizeClass == .regular {
+                Label("What to know", systemImage: "lightbulb.max.fill")
+                    .font(.title2.weight(.bold))
+                    .foregroundStyle(Color.ink)
+            } else {
+                Text("What to know")
+                    .font(.title2.weight(.bold))
+                    .foregroundStyle(Color.ink)
+            }
+            Text(entry.description)
+                .font(.body)
+                .foregroundStyle(Color.ink.opacity(0.84))
+                .lineSpacing(6)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(horizontalSizeClass == .regular ? 22 : 0)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background {
+            if horizontalSizeClass == .regular {
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .fill(.white.opacity(0.84))
+            }
+        }
+    }
+
+    private var actionButtons: some View {
+        HStack(spacing: 12) {
+            Button(action: addToShoppingList) {
+                Label(addToListState.title, systemImage: addToListState.symbol)
+                    .frame(maxWidth: .infinity)
+            }
+            .disabled(addToListState != .idle)
+            .contextMenu {
+                Button("Choose Different List", systemImage: "list.bullet") {
+                    chooseShoppingList()
+                }
+            }
+
+            Group {
+                if let shareImage {
+                    ShareLink(
+                        item: shareImage,
+                        subject: Text("Seafood Guide: \(entry.name)"),
+                        message: Text("Explore \(entry.name) with Seafood Guide."),
+                        preview: SharePreview(
+                            "\(entry.name) • Seafood Guide",
+                            image: shareImage.previewImage
+                        )
+                    ) {
+                        Label("Share", systemImage: "square.and.arrow.up")
+                            .frame(maxWidth: .infinity)
+                    }
+                } else {
+                    Label("Preparing", systemImage: "photo.badge.arrow.down")
+                        .frame(maxWidth: .infinity)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .buttonStyle(.borderedProminent)
+        .controlSize(.large)
     }
 
     private var metadata: (label: String, value: String, symbol: String) {
@@ -915,6 +1028,39 @@ struct SeafoodDetailView: View {
             previewData: previewData,
             filename: "Seafood-Guide-\(safeName).png"
         )
+    }
+}
+
+private struct RelatedSeafoodCard: View {
+    let entry: SeafoodEntry
+
+    private var category: SeafoodCategory {
+        SeafoodCategory(rawValue: entry.categoryIndex) ?? .other
+    }
+
+    var body: some View {
+        HStack(spacing: 13) {
+            Image(systemName: category.symbolName)
+                .font(.body.weight(.semibold))
+                .foregroundStyle(Color.ocean)
+                .frame(width: 46, height: 46)
+                .background(category.tintColor, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+
+            VStack(alignment: .leading, spacing: 5) {
+                Text(entry.name)
+                    .font(.headline)
+                    .foregroundStyle(Color.ink)
+                    .fixedSize(horizontal: false, vertical: true)
+                SeafoodGuidanceBadge(status: entry.status)
+            }
+
+            Spacer(minLength: 6)
+            CardChevron()
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .background(.white.opacity(0.9), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 }
 
